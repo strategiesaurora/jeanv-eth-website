@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { 
   Menu, X, Building2, MapPin, Coins, Shield, 
@@ -17,6 +17,69 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+
+function ParticleBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const count = 55;
+    const particles = Array.from({ length: count }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.18,
+      r: Math.random() * 1.4 + 0.4,
+      gold: Math.random() < 0.28,
+      opacity: Math.random() * 0.35 + 0.1,
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.gold
+          ? `rgba(201,164,76,${p.opacity})`
+          : `rgba(0,212,255,${p.opacity})`;
+        ctx.fill();
+      }
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.6 }}
+    />
+  );
+}
 
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,6 +116,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
+      <ParticleBackground />
       {/* Scroll Progress Indicator */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-[2px] bg-primary origin-left z-[60]"
@@ -141,18 +205,21 @@ function App() {
               transition={{ duration: 0.8 }}
               className="max-w-2xl"
             >
-              <div className="inline-block px-3 py-1 mb-6 rounded-full glass-panel border-primary/30 text-primary text-sm font-medium">
+              <div className="inline-block px-3 py-1 mb-8 rounded-full glass-panel border-primary/30 text-primary text-sm font-medium tracking-widest uppercase">
                 Corporate Service Provider
               </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4">
-                <span className="text-gradient">Jean V. Rak</span> 
-                <span className="text-muted-foreground block text-3xl md:text-4xl mt-2 font-normal">jeanv.eth</span>
+              <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-3 leading-[0.92]">
+                <span className="text-gradient">Jean V. Rak</span>
               </h1>
-              <h2 className="text-xl md:text-2xl font-light text-foreground mb-6">
-                Manager – <span className="text-primary font-medium text-glow">Corporate Service Provider</span>
+              <p className="text-muted-foreground/70 text-sm tracking-[0.3em] uppercase mb-8 font-sans">
+                jeanv.eth &nbsp;·&nbsp; Manager
+              </p>
+              <h2 className="font-display text-2xl md:text-3xl font-light text-foreground/90 mb-4 leading-snug italic">
+                « L'architecture invisible derrière <br className="hidden md:block" />
+                <span className="text-gradient-gold not-italic font-semibold">les structures qui durent.</span> »
               </h2>
-              <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-xl">
-                Je structure tous types de sociétés avec rigueur et je rémunère généreusement les apporteurs d'affaires sérieux.
+              <p className="text-base text-muted-foreground mb-10 leading-relaxed max-w-md">
+                Je structure tous types de sociétés — crypto, tech, holdings, traditionnel — avec rigueur et discrétion. Je rémunère généreusement les apporteurs d'affaires sérieux.
               </p>
               <div className="flex flex-col sm:flex-row gap-5">
                 <Button 
@@ -228,11 +295,26 @@ function App() {
                 </div>
               </div>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">Qui suis-je ?</h2>
-            <div className="w-16 h-1 bg-primary mx-auto mb-8 rounded-full" />
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            <h2 className="font-display text-5xl md:text-6xl font-bold mb-8">Qui suis-je ?</h2>
+            <div className="w-16 h-1 mx-auto mb-8 rounded-full" style={{ background: "linear-gradient(90deg, #00d4ff, #c9a44c)" }} />
+            <p className="text-lg text-muted-foreground leading-relaxed mb-10">
               Manager expérimenté au sein d'un Corporate Service Provider de premier plan, j'accompagne la création et la structuration de <span className="text-foreground font-medium">tous types de sociétés</span> : crypto & Web3, technologies, entreprises traditionnelles, holdings et fondations. Mon expertise couvre la mise en place de véhicules légaux robustes, la conformité réglementaire et l'optimisation des structures internationales. Propriétaire du domaine <span className="text-foreground font-medium">jeanv.eth</span>, je comprends intimement les enjeux de l'écosystème crypto comme ceux du business traditionnel.
             </p>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-4 mb-10 max-w-lg mx-auto">
+              {[
+                { num: "150+", label: "structures constituées" },
+                { num: "12+", label: "juridictions couvertes" },
+                { num: "5 ans", label: "d'expertise" },
+              ].map((s, i) => (
+                <div key={i} className="glass-panel rounded-xl p-4 text-center border-white/8 hover:border-primary/20 transition-colors">
+                  <div className="stat-number text-gradient-gold">{s.num}</div>
+                  <div className="text-xs text-muted-foreground mt-1 leading-tight">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
             <a 
               href="https://x.com/jeanv_rak" 
               target="_blank" 
@@ -254,7 +336,7 @@ function App() {
             viewport={{ once: true }}
             className="mb-16 md:mb-24"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Nos Services Corporate</h2>
+            <h2 className="font-display text-5xl md:text-6xl font-bold mb-4">Nos Services Corporate</h2>
             <p className="text-muted-foreground text-lg max-w-2xl">
               Une gamme complète de services de structuration et de gestion pour tous types d'entreprises — crypto, tech, holdings et structures traditionnelles.
             </p>
@@ -328,26 +410,30 @@ function App() {
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                 Programme Partenaires
               </div>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.0]">
                 Devenez apporteur d'affaires et monétisez votre réseau
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
                 Que vos contacts soient dans la crypto, la tech ou le business traditionnel, je vous accompagne sur tous types de projets. Commissions attractives jusqu'à 20 %, processus simple en 3 étapes, support complet et paiements rapides.
               </p>
               
-              <div className="glass-panel rounded-2xl p-6 mb-8 inline-block shadow-[0_0_40px_rgba(0,212,255,0.15)] animate-glow border-primary/30 relative overflow-hidden">
-                <div className="absolute inset-0 bg-primary/5" />
+              <div className="rounded-2xl p-6 mb-8 inline-block relative overflow-hidden border"
+                style={{
+                  background: "linear-gradient(135deg, rgba(201,164,76,0.08) 0%, rgba(0,212,255,0.04) 100%)",
+                  borderColor: "rgba(201,164,76,0.35)",
+                  boxShadow: "0 0 40px rgba(201,164,76,0.12), 0 0 80px rgba(0,212,255,0.06)"
+                }}>
                 <div className="relative z-10">
-                  <div className="text-4xl font-bold text-white mb-2">
-                    Jusqu'à <span className="text-gradient">20%</span> de commission
+                  <div className="font-display text-4xl font-bold text-white mb-2">
+                    Jusqu'à <span className="text-gradient-gold">20%</span> de commission
                   </div>
-                  <div className="text-sm text-primary uppercase tracking-wider font-semibold">Sur les frais de structuration initiale</div>
+                  <div className="text-sm uppercase tracking-widest font-medium text-gold/80">Sur les frais de structuration initiale</div>
                 </div>
               </div>
 
               <Button 
                 size="lg" 
-                className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-base animate-glow transition-all"
+                className="w-full sm:w-auto bg-primary text-black hover:bg-primary/85 font-bold h-14 px-10 text-base shadow-[0_0_24px_rgba(0,212,255,0.45)] hover:shadow-[0_0_40px_rgba(0,212,255,0.7)] transition-all duration-300 tracking-wide"
                 onClick={() => scrollTo("contact")}
               >
                 Je souhaite devenir apporteur <ChevronRight className="ml-2" size={18} />
@@ -396,18 +482,18 @@ function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-4xl md:text-5xl font-bold">Pourquoi me faire confiance ?</h2>
-              <div className="w-16 h-1 bg-primary mx-auto mt-6 rounded-full" />
+              <h2 className="font-display text-5xl md:text-6xl font-bold">Pourquoi me faire confiance ?</h2>
+              <div className="w-20 h-1 mx-auto mt-6 rounded-full" style={{ background: "linear-gradient(90deg, #00d4ff, #c9a44c)" }} />
             </motion.div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-20">
             {[
-              { icon: Lock, label: "Confidentialité absolue" },
-              { icon: UserCheck, label: "Expérience éprouvée" },
-              { icon: Globe2, label: "Réseau international" },
-              { icon: CheckSquare, label: "Approche personnalisée" },
-              { icon: Shield, label: "Conformité stricte" }
+              { icon: Lock, label: "Confidentialité absolue", gold: true },
+              { icon: UserCheck, label: "Expérience éprouvée", gold: false },
+              { icon: Globe2, label: "Réseau international", gold: false },
+              { icon: CheckSquare, label: "Approche personnalisée", gold: false },
+              { icon: Shield, label: "Conformité stricte", gold: true }
             ].map((point, i) => (
               <motion.div 
                 key={i}
@@ -416,9 +502,21 @@ function App() {
                 whileHover={{ y: -6, scale: 1.04 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, type: "spring", stiffness: 250 }}
-                className="glass-panel p-7 rounded-xl flex flex-col items-center text-center group hover:border-primary/40 hover:shadow-[0_0_30px_rgba(0,212,255,0.12)] transition-all cursor-default"
+                className="glass-panel p-7 rounded-xl flex flex-col items-center text-center group transition-all cursor-default"
+                style={point.gold ? { borderColor: "rgba(201,164,76,0.2)" } : {}}
               >
-                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:shadow-[0_0_18px_rgba(0,212,255,0.3)] transition-all duration-300">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300"
+                  style={point.gold ? {
+                    background: "rgba(201,164,76,0.1)",
+                    border: "1px solid rgba(201,164,76,0.3)",
+                    color: "#c9a44c",
+                  } : {
+                    background: "rgba(0,212,255,0.07)",
+                    border: "1px solid rgba(0,212,255,0.2)",
+                    color: "#00d4ff",
+                  }}
+                >
                   <point.icon size={26} strokeWidth={1.5} />
                 </div>
                 <h4 className="font-semibold text-foreground">{point.label}</h4>
@@ -448,15 +546,16 @@ function App() {
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -5 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 + 0.3 }}
-                className="glass-panel p-8 rounded-xl flex flex-col"
+                transition={{ delay: i * 0.1 + 0.3, type: "spring", stiffness: 200 }}
+                className="glass-panel p-8 rounded-xl flex flex-col hover:border-white/20 transition-colors cursor-default"
               >
-                <Quote className="text-primary/40 mb-4" size={32} />
-                <p className="text-muted-foreground leading-relaxed flex-grow mb-6 italic">"{testimonial.quote}"</p>
-                <div>
+                <Quote style={{ color: "#c9a44c", opacity: 0.7 }} className="mb-4" size={32} />
+                <p className="text-muted-foreground leading-relaxed flex-grow mb-6 italic font-light">"{testimonial.quote}"</p>
+                <div className="border-t border-white/8 pt-4">
                   <div className="font-semibold text-white">{testimonial.author}</div>
-                  <div className="text-sm text-primary">{testimonial.role}</div>
+                  <div className="text-sm" style={{ color: "#c9a44c" }}>{testimonial.role}</div>
                 </div>
               </motion.div>
             ))}
@@ -474,8 +573,8 @@ function App() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Prenons contact</h2>
-            <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
+            <h2 className="font-display text-5xl md:text-6xl font-bold mb-4">Prenons contact</h2>
+            <div className="w-20 h-1 mx-auto rounded-full" style={{ background: "linear-gradient(90deg, #00d4ff, #c9a44c)" }} />
             <p className="text-muted-foreground text-lg mt-6 max-w-xl mx-auto">
               Première consultation confidentielle — remplissez le formulaire ou prenez directement rendez-vous.
             </p>
@@ -518,13 +617,25 @@ function App() {
                   </div>
                 </div>
 
-                <div className="mt-12 relative z-10">
+                <div className="mt-12 relative z-10 space-y-3">
                   <a 
-                    href="#" 
-                    className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium pb-1 border-b border-primary/30 hover:border-primary transition-all group"
+                    href="https://calendly.com/jeanv-rak" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full h-12 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 group"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(201,164,76,0.18) 0%, rgba(201,164,76,0.08) 100%)",
+                      border: "1px solid rgba(201,164,76,0.45)",
+                      color: "#c9a44c",
+                      boxShadow: "0 0 20px rgba(201,164,76,0.1)"
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 0 35px rgba(201,164,76,0.25)")}
+                    onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 0 20px rgba(201,164,76,0.1)")}
                   >
-                    Prendre rendez-vous directement <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    Réserver un appel de 30 min
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </a>
+                  <p className="text-xs text-muted-foreground/50 text-center">Consultation confidentielle &amp; sans engagement</p>
                 </div>
               </div>
 

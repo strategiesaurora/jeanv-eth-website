@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -131,9 +131,13 @@
   --sidebar-ring: 190 100% 50%;
 
   --app-font-sans: 'Inter', sans-serif;
-  --app-font-serif: Georgia, serif;
+  --app-font-serif: 'Cormorant Garamond', Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.5rem;
+
+  /* Gold accent — prestige, wealth, tradition */
+  --gold: 42 72% 52%;
+  --gold-light: 42 90% 68%;
 
   --tracking-normal: 0em;
   --spacing: 0.25rem;
@@ -178,17 +182,50 @@
   .text-glow {
     text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
   }
+
+  .text-glow-gold {
+    text-shadow: 0 0 20px hsl(var(--gold) / 0.6);
+  }
   
   .bg-glow-subtle {
     box-shadow: 0 0 40px hsl(var(--primary) / 0.1);
   }
 
+  /* Serif display font — applied to all section titles */
+  .font-display {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Cyan → White gradient (name/brand) */
   .text-gradient {
-    background: linear-gradient(135deg, #00d4ff, #ffffff);
+    background: linear-gradient(135deg, #00d4ff 0%, #ffffff 80%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Gold gradient — prestige elements */
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold-light)) 0%, hsl(var(--gold)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Stat numbers */
+  .stat-number {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
   }
 }
 
