@@ -1,0 +1,44 @@
+Tu es un expert senior en design web3 B2B 2026. Crée un site single-page ultra-premium, moderne et professionnel pour **Jean V. Rak – jeanv.eth**, manager d’un Corporate Service Provider spécialisé crypto & Web3.
+
+**Positionnement** : Ton sérieux, discret, haut de gamme, confiance absolue. Cible prioritaire = apporteurs d’affaires (introducers, business developers, influenceurs web3) qui veulent monétiser leur réseau. Ton corporate, jamais hype.
+
+**Design exigé (très précis 2026)** :
+- Dark mode profond (#0a0a0a / #111111 fond)
+- Accents neon : cyan électrique (#00f5ff), vert crypto (#00ff9d), bleu profond
+- Gradients subtils et glassmorphism léger
+- Typographie : Inter ou Satoshi (très moderne), titres bold 600-700
+- Espacements généreux, beaucoup de whitespace
+- Micro-animations fluides (Tailwind + JS) : fade-in au scroll, hover scale + glow sur cartes, bouton pulse discret
+- Icônes Lucide ou Heroicons vectorielles
+- Responsive mobile-first parfait
+
+**Structure exacte** :
+1. **Hero plein écran** : photo portrait pro à droite, titre "Jean V. Rak – jeanv.eth", sous-titre "Manager – Corporate Service Provider Crypto & Web3", phrase forte : "Je structure des sociétés solides pour projets crypto et je rémunère généreusement les apporteurs d’affaires sérieux." Deux gros CTA : "Prendre rendez-vous" + "Devenir apporteur d’affaires" (glow neon).
+
+2. **Qui suis-je ?** (bio courte + lien X @jeanv_rak + jeanv.eth)
+
+3. **Nos Services** (5 cartes élégantes avec icônes) :
+   - Constitution de sociétés crypto (offshore & onshore)
+   - Domiciliation & substance économique
+   - Structuration token & compliance
+   - Obtention de licences VASP / MiCA
+   - Fiduciary, comptabilité & administration
+
+4. **Programme Apporteurs d’Affaires** (section mise en avant visuellement – la plus importante) :
+   Titre : "Devenez apporteur d’affaires et monétisez votre réseau"
+   Avantages clairs + commissions jusqu’à 20 %, processus en 3 étapes, paiements rapides, support complet. Gros bouton "Je veux devenir apporteur – Prendre RDV".
+
+5. **Pourquoi me faire confiance ?** (5 points avec icônes + témoignages anonymes si possible)
+
+6. **Contact** : Formulaire fonctionnel (Nom, Email, Type : Apporteur / Projet crypto / Autre, Message) + lien Calendly + coordonnées jeanv.eth
+
+**Footer** : jeanv.eth | @jeanv_rak | © 2026
+
+**Techniques** :
+- Utilise **Tailwind CSS** (via CDN ou full setup)
+- Code propre, commenté, facile à modifier
+- Formulaire qui fonctionne (Formspree ou Replit email)
+- SEO + Open Graph
+- Déployable immédiatement
+
+Génère le projet complet maintenant avec un design vraiment premium et futuriste crypto B2B.
