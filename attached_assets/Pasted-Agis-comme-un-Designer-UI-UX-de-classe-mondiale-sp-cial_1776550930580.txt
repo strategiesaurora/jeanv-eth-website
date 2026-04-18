@@ -1,0 +1,37 @@
+Agis comme un Designer UI/UX de classe mondiale spécialisé dans la FinTech et le Web3 de luxe (style Private Equity / Swiss Banking). Ta mission est de sublimer le site actuel pour en faire une interface de prestige, discrète et magnétique.
+
+Tu as carte blanche sur l'implémentation technique, mais respecte ces piliers stratégiques :
+
+1. Direction Artistique "Elite Digital" :
+
+Équilibre des couleurs : Utilise l'Or (#c9a44c) uniquement pour symboliser la valeur et le gain (stats, commissions, CTA principaux). Garde le Cyan pour la structure technologique.
+
+Typographie : Amplifie le contraste entre la Cormorant Garamond (élégance historique) pour les titres et une police Sans-Serif ultra-lisible pour le corps de texte.
+
+Effets : Implémente du 'Glassmorphism' (verre dépoli) sur les cartes et le header. Ajoute des micro-interactions de survol (hover) qui donnent une sensation de profondeur (shadows portées, effets de reflet).
+
+2. Layout & Structure (Liberté d'exécution) :
+
+Navigation : Crée un header 'Smart & Sticky' qui disparaît au scroll vers le bas et réapparaît au scroll vers le haut, avec un flou d'arrière-plan luxueux.
+
+Services : Réorganise la section Services. Ne te limite pas à une liste ; explore une structure de type 'Bento Grid' ou des cartes interactives asymétriques pour casser la monotonie.
+
+CryptoPunk : Traite l'avatar comme un sceau de noblesse numérique. Ajoute-lui un cadre raffiné et un effet de lueur (glow) pulsatile très lent en arrière-plan.
+
+3. Le "Apporteurs d'Affaires" Funnel :
+
+Cette section doit être le cœur battant du site. Rends le processus (3 étapes) visuellement irrésistible.
+
+Le badge '20%' doit attirer l'œil sans être agressif (pense à un sceau officiel ou une médaille numérique).
+
+4. Dynamisme & Fluidité :
+
+Optimise les particules en fond : elles doivent être fluides, presque organiques, sans ralentir la navigation.
+
+Ajoute des transitions 'Reveal on Scroll' élégantes pour chaque section.
+
+5. Call-to-Action (CTA) :
+
+Le bouton de réservation d'appel (Calendly) doit être le point focal. Donne-lui un effet 'shimmer' (balayage lumineux) périodique très discret pour attirer l'attention de l'utilisateur de manière inconsciente.
+
+Objectif final : Le visiteur doit se dire 'C'est ici que les affaires sérieuses se passent'. Je te fais confiance pour choisir les meilleures bibliothèques ou techniques CSS pour atteindre ce niveau de finition. Go !

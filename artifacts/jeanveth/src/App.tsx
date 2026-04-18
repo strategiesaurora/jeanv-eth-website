@@ -83,6 +83,7 @@ function ParticleBackground() {
 
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -92,10 +93,20 @@ function App() {
   });
 
   useEffect(() => {
+    let prevY = window.scrollY;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const curr = window.scrollY;
+      setIsScrolled(curr > 20);
+      if (curr < 80) {
+        setHeaderVisible(true);
+      } else if (curr > prevY + 8) {
+        setHeaderVisible(false);
+      } else if (curr < prevY - 6) {
+        setHeaderVisible(true);
+      }
+      prevY = curr;
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -123,12 +134,14 @@ function App() {
         style={{ scaleX }}
       />
 
-      {/* Header */}
+      {/* Header — Smart Sticky: hides on scroll-down, reveals on scroll-up */}
       <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+        className={`fixed top-0 w-full z-50 border-b transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           isScrolled 
-            ? "bg-black/60 backdrop-blur-xl border-white/10 py-3" 
+            ? "bg-black/55 backdrop-blur-2xl border-white/[0.07] shadow-[0_4px_30px_rgba(0,0,0,0.4)] py-3" 
             : "bg-transparent border-transparent py-5"
+        } ${
+          headerVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
@@ -248,12 +261,14 @@ function App() {
               className="flex justify-center lg:justify-end cursor-pointer"
             >
               <div className="relative w-72 h-72 md:w-80 md:h-80 group">
-                {/* Diffuse ambient halo — always visible, intensifies on hover */}
-                <div className="absolute -inset-6 rounded-full bg-primary/15 blur-[60px] opacity-80 group-hover:opacity-100 group-hover:bg-primary/25 transition-all duration-700" />
+                {/* Slow pulsating ambient halo — noble digital seal */}
+                <div className="absolute -inset-8 rounded-full bg-primary/20 animate-crypto-pulse pointer-events-none" />
+                {/* Gold secondary glow — prestige layer */}
+                <div className="absolute -inset-4 rounded-full pointer-events-none animate-crypto-pulse" style={{ background: "radial-gradient(circle, rgba(201,164,76,0.12) 0%, transparent 70%)", animationDelay: "-2.5s" }} />
                 {/* Sharp inner glow ring */}
                 <div className="absolute -inset-1 rounded-lg bg-primary/10 blur-[20px] opacity-60 group-hover:opacity-100 group-hover:blur-[30px] transition-all duration-500" />
                 {/* Animated border */}
-                <div className="absolute inset-0 rounded-lg border-2 border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_50px_rgba(0,212,255,0.5),inset_0_0_30px_rgba(0,212,255,0.08)] transition-all duration-500" />
+                <div className="absolute inset-0 rounded-lg border-2 border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_60px_rgba(0,212,255,0.55),inset_0_0_30px_rgba(0,212,255,0.08)] transition-all duration-500" />
                 {/* CryptoPunk image */}
                 <img 
                   src={cryptoPunk} 
@@ -342,54 +357,109 @@ function App() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Constitution de sociétés",
-                desc: "Création d'entités offshore et onshore pour tous secteurs : crypto, tech, holdings, DAOs et entreprises traditionnelles.",
-                icon: Building2
-              },
-              {
-                title: "Domiciliation & Substance",
-                desc: "Fourniture d'adresses enregistrées, bureaux physiques et substance économique locale.",
-                icon: MapPin
-              },
-              {
-                title: "Structuration & Compliance",
-                desc: "Ingénierie légale pour émissions de tokens, analyses juridiques et conformité AML/KYC.",
-                icon: Coins
-              },
-              {
-                title: "Obtention de licences",
-                desc: "Accompagnement dans vos demandes d'agrément (VASP, CASP, etc.) auprès des régulateurs.",
-                icon: Shield
-              },
-              {
-                title: "Fiduciaire & Administration",
-                desc: "Comptabilité spécialisée crypto, gestion administrative courante et représentation.",
-                icon: Calculator
-              }
-            ].map((service, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 200 }}
-              >
-                <div className="glass-panel h-full rounded-xl p-9 group hover:shadow-[0_0_45px_rgba(0,212,255,0.2)] hover:border-primary/50 transition-all duration-400 relative overflow-hidden cursor-default">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-7 relative group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.35)] transition-all duration-400">
-                    <service.icon size={26} className="relative z-10" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 relative z-10 group-hover:text-white transition-colors">{service.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed relative z-10">
-                    {service.desc}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+          {/* Bento Grid — asymmetric, cinq cartes en deux rangées */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+
+            {/* Card 1 — Featured large: Constitution */}
+            <motion.div
+              className="md:col-span-5 bento-card glass-panel rounded-2xl p-10 relative overflow-hidden cursor-default group"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-primary/5 blur-[60px] pointer-events-none" />
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-8 group-hover:bg-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_24px_rgba(0,212,255,0.3)] transition-all duration-400">
+                <Building2 size={30} />
+              </div>
+              <h3 className="font-display text-2xl font-bold mb-4 text-white leading-tight">Constitution de sociétés</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Création d'entités offshore et onshore pour tous secteurs : crypto, tech, holdings, DAOs et entreprises traditionnelles. Chaque structure est taillée sur mesure.
+              </p>
+              <div className="mt-8 inline-flex items-center gap-2 text-primary/60 text-sm font-medium group-hover:text-primary transition-colors">
+                Offshore · Onshore · DAOs
+              </div>
+            </motion.div>
+
+            {/* Card 2 — Domiciliation */}
+            <motion.div
+              className="md:col-span-4 bento-card glass-panel rounded-2xl p-8 relative overflow-hidden cursor-default group"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <div className="w-14 h-14 rounded-xl bg-primary/8 border border-primary/15 flex items-center justify-center text-primary mb-6 group-hover:bg-primary/18 group-hover:border-primary/35 transition-all duration-400">
+                <MapPin size={26} />
+              </div>
+              <h3 className="font-display text-xl font-bold mb-3 text-white">Domiciliation & Substance</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Adresses enregistrées, bureaux physiques et substance économique locale dans les juridictions les plus stratégiques.
+              </p>
+            </motion.div>
+
+            {/* Card 3 — Compliance */}
+            <motion.div
+              className="md:col-span-3 bento-card glass-panel rounded-2xl p-8 relative overflow-hidden cursor-default group"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              style={{ borderColor: "rgba(201,164,76,0.12)" }}
+            >
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-400"
+                style={{ background: "rgba(201,164,76,0.08)", border: "1px solid rgba(201,164,76,0.2)", color: "#c9a44c" }}>
+                <Coins size={26} />
+              </div>
+              <h3 className="font-display text-xl font-bold mb-3 text-white">Structuration & Compliance</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Ingénierie légale pour tokens, conformité AML/KYC et analyses juridiques.
+              </p>
+            </motion.div>
+
+            {/* Card 4 — Licences */}
+            <motion.div
+              className="md:col-span-4 bento-card glass-panel rounded-2xl p-8 relative overflow-hidden cursor-default group"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ borderColor: "rgba(201,164,76,0.12)" }}
+            >
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-400"
+                style={{ background: "rgba(201,164,76,0.08)", border: "1px solid rgba(201,164,76,0.2)", color: "#c9a44c" }}>
+                <Shield size={26} />
+              </div>
+              <h3 className="font-display text-xl font-bold mb-3 text-white">Obtention de licences</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Accompagnement dans vos demandes d'agrément VASP, CASP et autres auprès des régulateurs compétents.
+              </p>
+            </motion.div>
+
+            {/* Card 5 — Fiduciaire — Wide horizontal */}
+            <motion.div
+              className="md:col-span-8 bento-card glass-panel rounded-2xl p-8 relative overflow-hidden cursor-default group flex flex-col md:flex-row md:items-center gap-8"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-primary/[0.03] pointer-events-none" />
+              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.25)] transition-all duration-400">
+                <Calculator size={28} />
+              </div>
+              <div className="flex-grow">
+                <h3 className="font-display text-2xl font-bold mb-2 text-white">Fiduciaire & Administration</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Comptabilité spécialisée crypto, gestion administrative courante, représentation légale et reporting. Un partenaire de confiance de bout en bout.
+                </p>
+              </div>
+              <div className="flex-shrink-0 text-primary/20 group-hover:text-primary/40 transition-colors">
+                <ChevronRight size={32} />
+              </div>
+            </motion.div>
+
           </div>
         </div>
       </section>
@@ -417,17 +487,28 @@ function App() {
                 Que vos contacts soient dans la crypto, la tech ou le business traditionnel, je vous accompagne sur tous types de projets. Commissions attractives jusqu'à 20 %, processus simple en 3 étapes, support complet et paiements rapides.
               </p>
               
-              <div className="rounded-2xl p-6 mb-8 inline-block relative overflow-hidden border"
-                style={{
-                  background: "linear-gradient(135deg, rgba(201,164,76,0.08) 0%, rgba(0,212,255,0.04) 100%)",
-                  borderColor: "rgba(201,164,76,0.35)",
-                  boxShadow: "0 0 40px rgba(201,164,76,0.12), 0 0 80px rgba(0,212,255,0.06)"
-                }}>
-                <div className="relative z-10">
-                  <div className="font-display text-4xl font-bold text-white mb-2">
-                    Jusqu'à <span className="text-gradient-gold">20%</span> de commission
+              {/* Sceau officiel 20% — médaille numérique */}
+              <div className="flex items-center gap-8 mb-10">
+                <div className="relative flex-shrink-0 w-32 h-32 flex items-center justify-center">
+                  {/* Outer rotating dashed ring */}
+                  <div className="absolute inset-0 rounded-full animate-seal-rotate"
+                    style={{ border: "1.5px dashed rgba(201,164,76,0.45)" }} />
+                  {/* Middle counter-rotating ring */}
+                  <div className="absolute inset-2 rounded-full animate-seal-rotate-rev"
+                    style={{ border: "1px solid rgba(201,164,76,0.2)" }} />
+                  {/* Solid inner medal */}
+                  <div className="absolute inset-4 rounded-full flex flex-col items-center justify-center"
+                    style={{
+                      background: "radial-gradient(circle at 35% 35%, rgba(255,220,100,0.18) 0%, rgba(201,164,76,0.08) 60%, rgba(0,0,0,0) 100%)",
+                      border: "1px solid rgba(201,164,76,0.5)",
+                      boxShadow: "0 0 30px rgba(201,164,76,0.2), inset 0 0 20px rgba(201,164,76,0.05)"
+                    }}>
+                    <span className="font-display text-3xl font-bold leading-none" style={{ color: "#c9a44c" }}>20%</span>
                   </div>
-                  <div className="text-sm uppercase tracking-widest font-medium text-gold/80">Sur les frais de structuration initiale</div>
+                </div>
+                <div>
+                  <div className="font-display text-2xl font-semibold text-white mb-1">Jusqu'à 20% de commission</div>
+                  <div className="text-sm uppercase tracking-widest font-medium" style={{ color: "rgba(201,164,76,0.7)" }}>Sur les frais de structuration initiale</div>
                 </div>
               </div>
 
@@ -618,24 +699,18 @@ function App() {
                 </div>
 
                 <div className="mt-12 relative z-10 space-y-3">
+                  {/* Shimmer Calendly CTA — sweeping light effect */}
                   <a 
                     href="https://calendly.com/jeanv-rak" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full h-12 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 group"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(201,164,76,0.18) 0%, rgba(201,164,76,0.08) 100%)",
-                      border: "1px solid rgba(201,164,76,0.45)",
-                      color: "#c9a44c",
-                      boxShadow: "0 0 20px rgba(201,164,76,0.1)"
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 0 35px rgba(201,164,76,0.25)")}
-                    onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 0 20px rgba(201,164,76,0.1)")}
+                    className="btn-shimmer flex items-center justify-center gap-2 w-full h-12 rounded-xl font-bold text-sm tracking-widest uppercase group"
+                    style={{ boxShadow: "0 0 30px rgba(201,164,76,0.25), 0 4px 20px rgba(0,0,0,0.3)" }}
                   >
                     Réserver un appel de 30 min
                     <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </a>
-                  <p className="text-xs text-muted-foreground/50 text-center">Consultation confidentielle &amp; sans engagement</p>
+                  <p className="text-xs text-muted-foreground/40 text-center mt-2">Consultation confidentielle &amp; sans engagement</p>
                 </div>
               </div>
 

@@ -242,20 +242,82 @@
   animation: pulseGlow 2s infinite ease-in-out;
 }
 
+/* Organic float — bezier-eased, slight drift for living feel */
 @keyframes floatBackground {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(-15px, -25px) scale(1.03); }
+  66%  { transform: translate(20px, -10px) scale(0.97); }
+  100% { transform: translate(0px, 0px) scale(1); }
 }
 
 .animate-float-bg {
-  animation: floatBackground 10s ease-in-out infinite;
+  animation: floatBackground 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+/* CryptoPunk slow pulsating glow — noble digital seal */
+@keyframes cryptoPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+    filter: blur(50px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.12);
+    filter: blur(60px);
+  }
+}
+.animate-crypto-pulse {
+  animation: cryptoPulse 5s ease-in-out infinite;
+}
+
+/* Seal / medal slow rotation */
+@keyframes sealRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-seal-rotate {
+  animation: sealRotate 18s linear infinite;
+}
+.animate-seal-rotate-rev {
+  animation: sealRotate 12s linear infinite reverse;
+}
+
+/* Shimmer — periodic luminous sweep, very subtle */
+@keyframes shimmer {
+  0%   { background-position: -300% center; }
+  100% { background-position: 300% center; }
+}
+.btn-shimmer {
+  background: linear-gradient(
+    105deg,
+    #c9a44c 0%,
+    #c9a44c 35%,
+    rgba(255,255,220,0.55) 50%,
+    #c9a44c 65%,
+    #c9a44c 100%
+  );
+  background-size: 300% auto;
+  animation: shimmer 4s linear infinite;
+  color: #0a0a0a;
 }
 
 /* animated grid background */
 .bg-grid-pattern {
   background-image: 
-    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Bento card hover depth shadow */
+.bento-card {
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.35s ease;
+}
+.bento-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 30px rgba(0,212,255,0.1);
+  border-color: rgba(0,212,255,0.3);
 }
