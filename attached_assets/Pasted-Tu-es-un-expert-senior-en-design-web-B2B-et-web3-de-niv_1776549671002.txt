@@ -1,0 +1,52 @@
+Tu es un expert senior en design web B2B et web3 de niveau 2026. Crée un site single-page ultra-premium, moderne, élégant et professionnel pour **Jean V. Rak – jeanv.eth**, manager d’un Corporate Service Provider.
+
+**Positionnement exact** :
+Je suis Jean V. Rak, propriétaire de jeanv.eth. J’accompagne la création et la structuration de **tous types de sociétés** (crypto & Web3, technologies, entreprises traditionnelles, holdings, etc.) avec une expertise particulière sur les projets crypto. 
+Ma cible prioritaire : les apporteurs d’affaires (introducers, business developers, influenceurs, avocats, consultants) qui veulent monétiser leur réseau, quel que soit le secteur. Ton : professionnel, discret, haut de gamme, confiance absolue.
+
+**Design exigé** :
+- Dark mode profond (#0a0a0a)
+- Accents neon : cyan électrique (#00f5ff) et vert crypto (#00ff9d)
+- Gradients doux + glassmorphism léger
+- Typographie moderne (Inter ou Satoshi)
+- Micro-animations élégantes (fade-in au scroll, hover glow + scale sur cartes)
+- Icônes vectorielles Lucide ou Heroicons
+- Navigation sticky avec logo "jeanv.eth"
+
+**Utilisation obligatoire du CryptoPunk** :
+L’utilisateur va joindre son image CryptoPunk dans ce projet. Utilise **exactement cette image** comme avatar principal :
+- Dans le Hero (à droite, format portrait, avec léger glow cyan neon)
+- Dans la section "Qui suis-je ?" comme photo de profil stylisée
+- Petit badge discret dans le header (au survol, il s’agrandit légèrement)
+
+**Structure exacte** :
+
+1. **Hero** (pleine hauteur)  
+   Titre : "Jean V. Rak – jeanv.eth"  
+   Sous-titre : "Manager – Corporate Service Provider"  
+   Phrase : "Je structure tous types de sociétés avec rigueur et je rémunère généreusement les apporteurs d’affaires sérieux."  
+   Deux CTA : "Prendre rendez-vous" + "Devenir apporteur d’affaires"
+
+2. **Qui suis-je ?** (avec le CryptoPunk en photo de profil)
+
+3. **Nos Services** (5 cartes élégantes avec icônes)  
+   - Constitution de sociétés (offshore & onshore) – tous secteurs  
+   - Domiciliation & substance économique  
+   - Structuration token & compliance (crypto & Web3)  
+   - Obtention de licences (VASP, MiCA, etc.)  
+   - Fiduciary, comptabilité & administration
+
+4. **Programme Apporteurs d’Affaires** (section la plus mise en avant)  
+   Titre : "Devenez apporteur d’affaires et monétisez votre réseau"  
+   Texte : "Que vos contacts soient dans la crypto, la tech ou le business traditionnel, je vous accompagne sur tous types de projets. Commissions attractives jusqu’à 20 %, processus simple en 3 étapes, support complet et paiements rapides."  
+   Gros bouton : "Je veux devenir apporteur – Prendre RDV"
+
+5. **Pourquoi travailler avec moi** (5 points + témoignages)
+
+6. **Contact** (formulaire fonctionnel + placeholder Calendly)
+
+**Footer** : jeanv.eth | @jeanv_rak sur X | © 2026
+
+**Techniques** : Tailwind CSS, code propre, formulaire fonctionnel (Formspree ou équivalent), SEO de base, responsive parfait.
+
+Génère le projet complet immédiatement avec un design réellement premium.

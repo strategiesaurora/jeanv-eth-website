@@ -5,6 +5,7 @@ import {
   Calculator, CheckCircle2, ChevronRight, Lock, 
   Globe2, UserCheck, CheckSquare, ArrowRight, Quote
 } from "lucide-react";
+import cryptoPunk from "@assets/regular_1776549681584.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -68,10 +69,13 @@ function App() {
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
           <div 
-            className="text-xl font-bold text-primary tracking-tight cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => scrollTo("hero")}
           >
-            jeanv.eth
+            <div className="relative w-8 h-8 overflow-hidden rounded-sm border border-primary/30 group-hover:border-primary/70 transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_12px_rgba(0,212,255,0.5)]">
+              <img src={cryptoPunk} alt="jeanv.eth" className="w-full h-full object-cover" style={{ imageRendering: "pixelated" }} />
+            </div>
+            <span className="text-xl font-bold text-primary tracking-tight">jeanv.eth</span>
           </div>
           
           {/* Desktop Nav */}
@@ -172,12 +176,21 @@ function App() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex justify-center lg:justify-end"
             >
-              <div className="relative w-72 h-96 md:w-80 md:h-[420px] rounded-lg bg-gradient-to-b from-card to-background p-[1px] shadow-2xl group">
-                <div className="absolute inset-0 bg-primary/20 blur-[30px] rounded-full opacity-50 group-hover:opacity-80 transition-opacity duration-500" />
-                <div className="w-full h-full rounded-lg glass-panel bg-background/80 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-primary/40 transition-colors duration-500">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="text-7xl font-light text-muted-foreground/30 tracking-widest relative z-10 group-hover:text-primary/50 transition-colors duration-500">JVR</div>
-                  <div className="absolute bottom-6 text-xs tracking-[0.2em] text-muted-foreground/50 uppercase group-hover:text-primary/70 transition-colors">Corporate Trust</div>
+              <div className="relative w-72 h-72 md:w-80 md:h-80 group">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 rounded-sm bg-primary/20 blur-[40px] opacity-60 group-hover:opacity-100 transition-opacity duration-500 scale-110" />
+                {/* Animated border */}
+                <div className="absolute inset-0 rounded-sm border-2 border-primary/40 group-hover:border-primary/80 group-hover:shadow-[0_0_40px_rgba(0,212,255,0.4),inset_0_0_40px_rgba(0,212,255,0.1)] transition-all duration-500" />
+                {/* CryptoPunk image */}
+                <img 
+                  src={cryptoPunk} 
+                  alt="Jean V. Rak – jeanv.eth CryptoPunk" 
+                  className="w-full h-full object-cover rounded-sm relative z-10"
+                  style={{ imageRendering: "pixelated" }}
+                />
+                {/* Bottom label */}
+                <div className="absolute -bottom-8 left-0 right-0 text-center text-xs tracking-[0.2em] text-primary/60 uppercase font-medium">
+                  jeanv.eth
                 </div>
               </div>
             </motion.div>
@@ -195,6 +208,20 @@ function App() {
             viewport={{ once: true, margin: "-100px" }}
             className="max-w-3xl mx-auto text-center"
           >
+            {/* CryptoPunk profile avatar */}
+            <div className="flex justify-center mb-8">
+              <div className="relative group">
+                <div className="absolute inset-0 rounded-sm bg-primary/30 blur-[20px] opacity-70 group-hover:opacity-100 transition-opacity duration-300 scale-110" />
+                <div className="relative w-24 h-24 rounded-sm border-2 border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_24px_rgba(0,212,255,0.5)] transition-all duration-300 overflow-hidden">
+                  <img 
+                    src={cryptoPunk} 
+                    alt="Jean V. Rak" 
+                    className="w-full h-full object-cover"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                </div>
+              </div>
+            </div>
             <h2 className="text-3xl font-bold mb-8">Qui suis-je ?</h2>
             <div className="w-12 h-1 bg-primary mx-auto mb-8 rounded-full" />
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
