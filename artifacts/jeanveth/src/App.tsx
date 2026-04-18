@@ -142,10 +142,10 @@ function App() {
                 <span className="text-muted-foreground block text-3xl md:text-4xl mt-2 font-normal">jeanv.eth</span>
               </h1>
               <h2 className="text-xl md:text-2xl font-light text-foreground mb-6">
-                Manager spécialisé <span className="text-primary font-medium text-glow">Crypto & Web3</span>
+                Manager – <span className="text-primary font-medium text-glow">Corporate Service Provider</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-xl">
-                Je structure des sociétés solides pour projets crypto et je rémunère généreusement les apporteurs d'affaires sérieux.
+                Je structure tous types de sociétés avec rigueur et je rémunère généreusement les apporteurs d'affaires sérieux.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -198,7 +198,7 @@ function App() {
             <h2 className="text-3xl font-bold mb-8">Qui suis-je ?</h2>
             <div className="w-12 h-1 bg-primary mx-auto mb-8 rounded-full" />
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Manager expérimenté au sein d'un Corporate Service Provider de premier plan, je suis spécialisé dans la structuration d'entités pour les projets Web3. Mon expertise couvre la mise en place de véhicules légaux robustes, la conformité réglementaire et l'optimisation des structures internationales. Propriétaire du domaine <span className="text-foreground font-medium">jeanv.eth</span>, je comprends intimement les enjeux techniques et légaux de l'écosystème crypto.
+              Manager expérimenté au sein d'un Corporate Service Provider de premier plan, j'accompagne la création et la structuration de <span className="text-foreground font-medium">tous types de sociétés</span> : crypto & Web3, technologies, entreprises traditionnelles, holdings et fondations. Mon expertise couvre la mise en place de véhicules légaux robustes, la conformité réglementaire et l'optimisation des structures internationales. Propriétaire du domaine <span className="text-foreground font-medium">jeanv.eth</span>, je comprends intimement les enjeux de l'écosystème crypto comme ceux du business traditionnel.
             </p>
             <a 
               href="https://x.com/jeanv_rak" 
@@ -223,15 +223,15 @@ function App() {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos Services Corporate</h2>
             <p className="text-muted-foreground text-lg max-w-2xl">
-              Une gamme complète de services de structuration et de gestion pour les acteurs de l'écosystème Web3.
+              Une gamme complète de services de structuration et de gestion pour tous types d'entreprises — crypto, tech, holdings et structures traditionnelles.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: "Constitution de sociétés crypto",
-                desc: "Création d'entités offshore et onshore adaptées à vos activités Web3, DAOs et fondations.",
+                title: "Constitution de sociétés",
+                desc: "Création d'entités offshore et onshore pour tous secteurs : crypto, tech, holdings, DAOs et entreprises traditionnelles.",
                 icon: Building2
               },
               {
@@ -299,7 +299,7 @@ function App() {
                 Devenez apporteur d'affaires et monétisez votre réseau
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                Vous êtes avocat, consultant, influenceur Web3 ou business developer ? Recommandez nos services de structuration à vos clients et percevez des commissions récurrentes.
+                Que vos contacts soient dans la crypto, la tech ou le business traditionnel, je vous accompagne sur tous types de projets. Commissions attractives jusqu'à 20 %, processus simple en 3 étapes, support complet et paiements rapides.
               </p>
               
               <div className="glass-panel rounded-2xl p-6 mb-8 inline-block shadow-[0_0_40px_rgba(0,212,255,0.15)] animate-glow border-primary/30 relative overflow-hidden">
