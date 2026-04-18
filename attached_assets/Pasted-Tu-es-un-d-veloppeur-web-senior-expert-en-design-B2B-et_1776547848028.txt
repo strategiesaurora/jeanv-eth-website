@@ -1,0 +1,67 @@
+Tu es un développeur web senior expert en design B2B et en sites corporate minimalistes. 
+
+Crée-moi un site web **single-page** (one-page) professionnel, moderne et élégant pour **jeanv.eth**, entièrement en français (pas d’anglais sauf si nécessaire pour des termes techniques crypto standards).
+
+**Contexte et positionnement :**
+Je suis Jean V. Rak, propriétaire de jeanv.eth, manager d’un corporate service provider spécialisé dans la structuration d’entreprises pour des projets crypto et Web3. 
+Mon activité principale : constitution de sociétés (offshore/onshore), domiciliation, substance économique, token structuring, compliance et licensing (VASP, etc.).
+Ma cible prioritaire : les **apporteurs d’affaires** (introducers, business developers, influenceurs web3, avocats, consultants) qui veulent monétiser leur réseau en m’amenant des clients corporate crypto. 
+Le ton doit être professionnel, sérieux, de confiance, discret et haut de gamme — jamais trop hype ou "crypto bro".
+
+**Design global exigé :**
+- Style : minimaliste, corporate web3 haut de gamme
+- Palette de couleurs : fond très sombre (#0a0a0a ou #111111), accents bleu électrique / cyan (#00f5ff ou #00d4ff), vert crypto subtil (#00ff9d), texte blanc/gris clair
+- Typographie : police moderne sans-serif (Inter, Satoshi ou équivalent), titres en poids bold, beaucoup d’espace blanc (whitespace généreux)
+- Responsive : parfaitement mobile-first et tablette
+- Navigation : sticky header avec logo "jeanv.eth" à gauche, menu à droite (Accueil, Services, Apporteurs, Contact)
+- Animations : subtiles et élégantes (fade-in au scroll, hover smooth)
+- Pas d’images stock génériques : placeholders pour une photo pro de moi + icônes vectorielles simples (utilise Lucide icons ou Heroicons si possible)
+
+**Structure exacte du site (sections dans l’ordre) :**
+
+1. **Hero Section** (pleine hauteur)
+   - Titre principal : "Jean V. Rak – jeanv.eth"
+   - Sous-titre : "Manager de Corporate Service Provider spécialisé Crypto & Web3"
+   - Phrase d’accroche forte : "Je structure des sociétés solides pour projets crypto et je rémunère généreusement les apporteurs d’affaires sérieux."
+   - Boutons CTA : "Prendre rendez-vous" + "Devenir apporteur d’affaires"
+   - Photo portrait pro à droite (placeholder)
+
+2. **Qui suis-je ?** (section courte)
+   - Bio professionnelle : expérience, expertise, lien avec jeanv.eth, lien vers @jeanv_rak sur X.
+
+3. **Nos Services**
+   - Cartes claires avec icônes :
+     - Constitution de sociétés crypto (offshore & onshore)
+     - Domiciliation & substance économique
+     - Structuration token et compliance
+     - Obtention de licences (VASP, etc.)
+     - Fiduciary, comptabilité & administration
+
+4. **Pour les Apporteurs d’Affaires** ← Section la plus mise en avant (design légèrement plus impactant)
+   - Titre : "Devenez apporteur d’affaires et monétisez votre réseau"
+   - Avantages clairs : commissions attractives et transparentes, processus simple et rapide, support complet, paiements fiables.
+   - Mise en avant des % de commission (placeholder : "jusqu’à X% sur les frais de structuration")
+   - Bouton fort : "Je souhaite devenir apporteur – Prendre rendez-vous"
+
+5. **Pourquoi travailler avec moi**
+   - Points de confiance : confidentialité, expérience, réseau international, approche personnalisée, conformité stricte.
+
+6. **Contact**
+   - Formulaire simple (Nom, Email, Téléphone, Type de demande : "Je suis apporteur" / "Je suis un projet crypto" / "Autre", Message)
+   - Ou intégration Calendly (placeholder pour le lien)
+   - Coordonnées : jeanv.eth + @jeanv_rak
+
+**Footer :**
+- jeanv.eth | @jeanv_rak sur X | Tous droits réservés © 2026
+
+**Exigences techniques :**
+- Site en HTML + Tailwind CSS (ou CSS moderne) + JavaScript léger
+- Code propre, bien commenté et facile à modifier
+- Formulaire qui envoie un email (utilise Formspree ou placeholder pour l’instant)
+- SEO de base : titres, meta description, balises Open Graph
+- Optimisé pour la vitesse (chargement rapide)
+
+Génère le projet complet avec un seul fichier index.html principal si possible, ou structure classique (index.html, style.css, script.js). 
+Rends-le immédiatement déployable et visuellement premium. 
+
+Commence maintenant.
