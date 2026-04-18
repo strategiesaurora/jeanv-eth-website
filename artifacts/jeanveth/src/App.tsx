@@ -72,10 +72,13 @@ function App() {
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => scrollTo("hero")}
           >
-            <div className="relative w-8 h-8 overflow-hidden rounded-sm border border-primary/30 group-hover:border-primary/70 transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_12px_rgba(0,212,255,0.5)]">
+            <div className="relative w-10 h-10 overflow-hidden rounded-md border border-primary/40 group-hover:border-primary transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_18px_rgba(0,212,255,0.6)] flex-shrink-0">
               <img src={cryptoPunk} alt="jeanv.eth" className="w-full h-full object-cover" style={{ imageRendering: "pixelated" }} />
             </div>
-            <span className="text-xl font-bold text-primary tracking-tight">jeanv.eth</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-lg font-bold text-primary tracking-tight group-hover:text-glow transition-all">jeanv.eth</span>
+              <span className="text-[10px] text-muted-foreground/60 tracking-[0.15em] uppercase font-medium">Corporate Service Provider</span>
+            </div>
           </div>
           
           {/* Desktop Nav */}
@@ -151,10 +154,10 @@ function App() {
               <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-xl">
                 Je structure tous types de sociétés avec rigueur et je rémunère généreusement les apporteurs d'affaires sérieux.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-5">
                 <Button 
                   size="lg" 
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold h-14 px-8 text-base animate-glow transition-all"
+                  className="bg-primary text-black hover:bg-primary/85 font-bold h-14 px-10 text-base shadow-[0_0_24px_rgba(0,212,255,0.45)] hover:shadow-[0_0_40px_rgba(0,212,255,0.7)] transition-all duration-300 tracking-wide"
                   onClick={() => scrollTo("contact")}
                 >
                   Prendre rendez-vous
@@ -162,7 +165,7 @@ function App() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white/20 hover:bg-white/10 h-14 px-8 text-base backdrop-blur-sm"
+                  className="border-primary/40 hover:border-primary/80 hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] h-14 px-10 text-base backdrop-blur-sm text-foreground transition-all duration-300 tracking-wide"
                   onClick={() => scrollTo("apporteurs")}
                 >
                   Devenir apporteur d'affaires
@@ -174,22 +177,25 @@ function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex justify-center lg:justify-end"
+              whileHover={{ scale: 1.04 }}
+              className="flex justify-center lg:justify-end cursor-pointer"
             >
               <div className="relative w-72 h-72 md:w-80 md:h-80 group">
-                {/* Outer glow ring */}
-                <div className="absolute inset-0 rounded-sm bg-primary/20 blur-[40px] opacity-60 group-hover:opacity-100 transition-opacity duration-500 scale-110" />
+                {/* Diffuse ambient halo — always visible, intensifies on hover */}
+                <div className="absolute -inset-6 rounded-full bg-primary/15 blur-[60px] opacity-80 group-hover:opacity-100 group-hover:bg-primary/25 transition-all duration-700" />
+                {/* Sharp inner glow ring */}
+                <div className="absolute -inset-1 rounded-lg bg-primary/10 blur-[20px] opacity-60 group-hover:opacity-100 group-hover:blur-[30px] transition-all duration-500" />
                 {/* Animated border */}
-                <div className="absolute inset-0 rounded-sm border-2 border-primary/40 group-hover:border-primary/80 group-hover:shadow-[0_0_40px_rgba(0,212,255,0.4),inset_0_0_40px_rgba(0,212,255,0.1)] transition-all duration-500" />
+                <div className="absolute inset-0 rounded-lg border-2 border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_50px_rgba(0,212,255,0.5),inset_0_0_30px_rgba(0,212,255,0.08)] transition-all duration-500" />
                 {/* CryptoPunk image */}
                 <img 
                   src={cryptoPunk} 
                   alt="Jean V. Rak – jeanv.eth CryptoPunk" 
-                  className="w-full h-full object-cover rounded-sm relative z-10"
+                  className="w-full h-full object-cover rounded-lg relative z-10 group-hover:brightness-110 transition-all duration-500"
                   style={{ imageRendering: "pixelated" }}
                 />
                 {/* Bottom label */}
-                <div className="absolute -bottom-8 left-0 right-0 text-center text-xs tracking-[0.2em] text-primary/60 uppercase font-medium">
+                <div className="absolute -bottom-8 left-0 right-0 text-center text-xs tracking-[0.2em] text-primary/60 uppercase font-medium group-hover:text-primary transition-colors">
                   jeanv.eth
                 </div>
               </div>
@@ -199,7 +205,7 @@ function App() {
       </section>
 
       {/* Qui suis-je? */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-card/20" />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -222,8 +228,8 @@ function App() {
                 </div>
               </div>
             </div>
-            <h2 className="text-3xl font-bold mb-8">Qui suis-je ?</h2>
-            <div className="w-12 h-1 bg-primary mx-auto mb-8 rounded-full" />
+            <h2 className="text-4xl md:text-5xl font-bold mb-8">Qui suis-je ?</h2>
+            <div className="w-16 h-1 bg-primary mx-auto mb-8 rounded-full" />
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
               Manager expérimenté au sein d'un Corporate Service Provider de premier plan, j'accompagne la création et la structuration de <span className="text-foreground font-medium">tous types de sociétés</span> : crypto & Web3, technologies, entreprises traditionnelles, holdings et fondations. Mon expertise couvre la mise en place de véhicules légaux robustes, la conformité réglementaire et l'optimisation des structures internationales. Propriétaire du domaine <span className="text-foreground font-medium">jeanv.eth</span>, je comprends intimement les enjeux de l'écosystème crypto comme ceux du business traditionnel.
             </p>
@@ -240,7 +246,7 @@ function App() {
       </section>
 
       {/* Nos Services */}
-      <section id="services" className="py-32 relative">
+      <section id="services" className="py-40 relative">
         <div className="container mx-auto px-6">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -248,7 +254,7 @@ function App() {
             viewport={{ once: true }}
             className="mb-16 md:mb-24"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos Services Corporate</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Nos Services Corporate</h2>
             <p className="text-muted-foreground text-lg max-w-2xl">
               Une gamme complète de services de structuration et de gestion pour tous types d'entreprises — crypto, tech, holdings et structures traditionnelles.
             </p>
@@ -284,18 +290,18 @@ function App() {
             ].map((service, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -8, scale: 1.02 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
+                transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 200 }}
               >
-                <div className="glass-panel h-full rounded-xl p-8 group hover:shadow-[0_0_30px_rgba(0,212,255,0.15)] hover:border-cyan-500/40 transition-all duration-500 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 relative">
-                    <div className="absolute inset-0 rounded-xl border border-primary/0 group-hover:border-primary/50 group-hover:shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all duration-300" />
+                <div className="glass-panel h-full rounded-xl p-9 group hover:shadow-[0_0_45px_rgba(0,212,255,0.2)] hover:border-primary/50 transition-all duration-400 relative overflow-hidden cursor-default">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-7 relative group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.35)] transition-all duration-400">
                     <service.icon size={26} className="relative z-10" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 relative z-10">{service.title}</h3>
+                  <h3 className="text-xl font-semibold mb-3 relative z-10 group-hover:text-white transition-colors">{service.title}</h3>
                   <p className="text-muted-foreground leading-relaxed relative z-10">
                     {service.desc}
                   </p>
@@ -307,7 +313,7 @@ function App() {
       </section>
 
       {/* Apporteurs d'Affaires - Highlight Section */}
-      <section id="apporteurs" className="py-32 relative overflow-hidden">
+      <section id="apporteurs" className="py-40 relative overflow-hidden">
         <div className="absolute inset-0 glass-panel border-y border-primary/20 bg-primary/[0.02]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-40" />
         
@@ -322,7 +328,7 @@ function App() {
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                 Programme Partenaires
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
                 Devenez apporteur d'affaires et monétisez votre réseau
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
@@ -382,7 +388,7 @@ function App() {
       </section>
 
       {/* Pourquoi me faire confiance */}
-      <section className="py-24 relative">
+      <section className="py-40 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <motion.div
@@ -390,12 +396,12 @@ function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold">Pourquoi me faire confiance ?</h2>
-              <div className="w-12 h-1 bg-primary mx-auto mt-6 rounded-full" />
+              <h2 className="text-4xl md:text-5xl font-bold">Pourquoi me faire confiance ?</h2>
+              <div className="w-16 h-1 bg-primary mx-auto mt-6 rounded-full" />
             </motion.div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-20">
             {[
               { icon: Lock, label: "Confidentialité absolue" },
               { icon: UserCheck, label: "Expérience éprouvée" },
@@ -407,14 +413,15 @@ function App() {
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -6, scale: 1.04 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-panel p-6 rounded-xl flex flex-col items-center text-center group hover:border-primary/30 transition-colors"
+                transition={{ delay: i * 0.1, type: "spring", stiffness: 250 }}
+                className="glass-panel p-7 rounded-xl flex flex-col items-center text-center group hover:border-primary/40 hover:shadow-[0_0_30px_rgba(0,212,255,0.12)] transition-all cursor-default"
               >
-                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary group-hover:scale-110 transition-transform">
-                  <point.icon size={24} strokeWidth={1.5} />
+                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:shadow-[0_0_18px_rgba(0,212,255,0.3)] transition-all duration-300">
+                  <point.icon size={26} strokeWidth={1.5} />
                 </div>
-                <h4 className="font-medium text-foreground">{point.label}</h4>
+                <h4 className="font-semibold text-foreground">{point.label}</h4>
               </motion.div>
             ))}
           </div>
@@ -458,14 +465,28 @@ function App() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-32 relative">
+      <section id="contact" className="py-40 relative">
         <div className="absolute inset-0 bg-card/30" />
         <div className="container mx-auto px-6 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Prenons contact</h2>
+            <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
+            <p className="text-muted-foreground text-lg mt-6 max-w-xl mx-auto">
+              Première consultation confidentielle — remplissez le formulaire ou prenez directement rendez-vous.
+            </p>
+          </motion.div>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-5xl mx-auto glass-panel rounded-2xl overflow-hidden shadow-2xl border-white/10"
+            transition={{ delay: 0.1 }}
+            className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(0,212,255,0.08)] border border-white/10"
+            style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(24px)" }}
           >
             <div className="grid md:grid-cols-5">
               
@@ -551,7 +572,7 @@ function App() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-14 text-base font-semibold animate-glow transition-all">
+                  <Button type="submit" className="w-full bg-primary text-black hover:bg-primary/85 h-14 text-base font-bold shadow-[0_0_24px_rgba(0,212,255,0.4)] hover:shadow-[0_0_40px_rgba(0,212,255,0.65)] transition-all duration-300 tracking-wide">
                     Envoyer le message
                   </Button>
                 </form>
