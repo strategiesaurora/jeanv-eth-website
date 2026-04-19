@@ -307,30 +307,68 @@ function NostrIcon({ size = 22, className = "" }: { size?: number; className?: s
  * pour chaque juridiction opérée. Auto-rotation + drag pointeur.
  * La même librairie que Linear, Vercel, Stripe utilisent pour leurs globes.
  */
-const JURISDICTION_MARKERS: Array<{ name: string; location: [number, number]; size: number; premium?: boolean }> = [
-  { name: "Suisse",            location: [46.20, 6.14],     size: 0.09, premium: true },
-  { name: "Dubaï · UAE",       location: [25.20, 55.27],    size: 0.11, premium: true },
-  { name: "Singapour",         location: [1.35, 103.82],    size: 0.10, premium: true },
-  { name: "Luxembourg",        location: [49.61, 6.13],     size: 0.07 },
-  { name: "Cayman Islands",    location: [19.31, -81.25],   size: 0.08 },
-  { name: "BVI",               location: [18.42, -64.62],   size: 0.07 },
-  { name: "Hong Kong",         location: [22.30, 114.17],   size: 0.09 },
-  { name: "Estonie",           location: [59.44, 24.75],    size: 0.07 },
-  { name: "Delaware · USA",    location: [39.16, -75.52],   size: 0.08 },
-  { name: "Malte",             location: [35.90, 14.51],    size: 0.06 },
-  { name: "Liechtenstein",     location: [47.14, 9.52],     size: 0.06 },
-  { name: "Panama",            location: [8.97, -79.53],    size: 0.07 },
-  { name: "Île Maurice",       location: [-20.35, 57.55],   size: 0.07 },
-  { name: "Seychelles",        location: [-4.62, 55.45],    size: 0.06 },
-  { name: "Wyoming · USA",     location: [42.96, -107.30],  size: 0.07 },
-  { name: "Marshall Islands",  location: [7.13, 171.18],    size: 0.06 },
+type Jurisdiction = {
+  name: string;
+  short: string;
+  location: [number, number];
+  size: number;
+  primary?: boolean;
+  note: string;
+};
+
+const JURISDICTION_MARKERS: Jurisdiction[] = [
+  { name: "Émirats Arabes Unis", short: "UAE",        location: [25.20, 55.27],   size: 0.13, primary: true,
+    note: "Hub principal · Dubaï · 0 % impôt sur les bénéfices personnels" },
+  { name: "Royaume-Uni",         short: "UK",         location: [51.51, -0.13],   size: 0.07,
+    note: "LTD pour activités tech & holdings européennes" },
+  { name: "Seychelles",          short: "Seychelles", location: [-4.62, 55.45],   size: 0.07,
+    note: "IBC offshore · confidentialité élevée" },
+  { name: "États-Unis",          short: "US",         location: [39.16, -75.52],  size: 0.07,
+    note: "LLC Delaware ou Wyoming · accès marché US" },
+  { name: "Panama",              short: "Panama",     location: [8.97, -79.53],   size: 0.07,
+    note: "Société de droit panaméen · neutralité juridique" },
 ];
 
-function BlockchainGlobe() {
+const UAE_INDEX = 0;
+const UAE_PHI = -JURISDICTION_MARKERS[UAE_INDEX].location[1] * Math.PI / 180;
+
+function BlockchainGlobe({ focusedIdx }: { focusedIdx: number | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
   const pointerInteractionMovement = useRef(0);
-  const phiRef = useRef(0);
+  // phi affiché (rotation horizontale courante)
+  const phiRef = useRef(UAE_PHI);
+  // phi cible — null = mode auto-drift gracieux ; sinon ease-to-target ("fly-to")
+  const targetPhiRef = useRef<number | null>(UAE_PHI);
+
+  // Quand l'utilisateur survole une juridiction → fly-to (chemin le plus court)
+  useEffect(() => {
+    if (focusedIdx === null) {
+      targetPhiRef.current = null; // libère vers auto-drift
+      return;
+    }
+    const m = JURISDICTION_MARKERS[focusedIdx];
+    if (!m) return;
+    const targetRaw = -m.location[1] * Math.PI / 180;
+    const TWO_PI = Math.PI * 2;
+    // chemin le plus court sur le cercle
+    const diff = ((targetRaw - phiRef.current) % TWO_PI + TWO_PI * 1.5) % TWO_PI - Math.PI;
+    targetPhiRef.current = phiRef.current + diff;
+  }, [focusedIdx]);
+
+  // Lock initial sur UAE pendant 1.6s puis libère vers auto-drift
+  // (uniquement si l'utilisateur n'a pas déjà interagi entre-temps)
+  const initLockActiveRef = useRef(true);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      initLockActiveRef.current = false;
+      // Ne libère que si on est encore sur le lock initial UAE (aucun focus utilisateur)
+      if (targetPhiRef.current === UAE_PHI) {
+        targetPhiRef.current = null;
+      }
+    }, 1600);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -348,22 +386,25 @@ function BlockchainGlobe() {
       devicePixelRatio: 2,
       width: width * 2,
       height: width * 2,
-      phi: 0,
-      theta: 0.28,
+      phi: UAE_PHI,
+      theta: 0.32,
       dark: 1,
       diffuse: 1.4,
-      mapSamples: 18000,
-      mapBrightness: 5.5,
-      // Tons sombres bleutés pour matcher le bg du site
+      mapSamples: 20000,
+      mapBrightness: 5.8,
       baseColor: [0.08, 0.13, 0.20],
-      // Cyan signature (#00d4ff)
       markerColor: [0, 0.83, 1],
-      // Glow cyan profond derrière le globe
       glowColor: [0.0, 0.32, 0.55],
       markers: JURISDICTION_MARKERS.map(m => ({ location: m.location, size: m.size })),
       onRender: (state: Record<string, number>) => {
-        if (pointerInteracting.current === null && !prefersReduced) {
-          phiRef.current += 0.0028;
+        if (pointerInteracting.current === null) {
+          if (targetPhiRef.current !== null) {
+            // Easing exponentiel vers la cible (effet "fly-to" cinématique)
+            phiRef.current += (targetPhiRef.current - phiRef.current) * 0.06;
+          } else if (!prefersReduced) {
+            // Auto-drift contemplatif
+            phiRef.current += 0.0022;
+          }
         }
         state.phi = phiRef.current + pointerInteractionMovement.current;
         state.width = width * 2;
@@ -371,7 +412,6 @@ function BlockchainGlobe() {
       },
     } as Parameters<typeof createGlobe>[1]);
 
-    // Fade-in après que le globe a rendu son premier frame
     const fadeTimer = setTimeout(() => {
       if (canvas) canvas.style.opacity = "1";
     }, 80);
@@ -390,23 +430,55 @@ function BlockchainGlobe() {
         className="absolute inset-0 -z-10 pointer-events-none rounded-full"
         style={{
           background:
-            "radial-gradient(circle at 50% 55%, rgba(0,212,255,0.18) 0%, rgba(0,212,255,0.06) 35%, transparent 65%)",
-          filter: "blur(20px)",
+            "radial-gradient(circle at 50% 55%, rgba(0,212,255,0.20) 0%, rgba(0,212,255,0.07) 35%, transparent 65%)",
+          filter: "blur(24px)",
         }}
       />
-      {/* Halo doré subtil en bas (impression de socle/ancrage) */}
+      {/* Halo doré au socle (effet d'ancrage premium) */}
       <div
-        className="absolute -inset-x-8 -bottom-4 h-32 -z-10 pointer-events-none"
+        className="absolute -inset-x-8 -bottom-6 h-36 -z-10 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center top, rgba(201,164,76,0.08) 0%, transparent 70%)",
-          filter: "blur(12px)",
+            "radial-gradient(ellipse at center top, rgba(201,164,76,0.10) 0%, transparent 70%)",
+          filter: "blur(16px)",
         }}
       />
+
+      {/* Compass ring décoratif — anneau pointillé doré subtil */}
+      <div
+        className="absolute inset-[-7%] rounded-full pointer-events-none animate-seal-rotate"
+        style={{
+          border: "1px dashed rgba(201,164,76,0.12)",
+        }}
+      />
+      {/* Anneau cyan plus serré + en sens inverse */}
+      <div
+        className="absolute inset-[-3%] rounded-full pointer-events-none animate-seal-rotate-rev"
+        style={{
+          border: "1px solid rgba(0,212,255,0.08)",
+        }}
+      />
+      {/* Points cardinaux subtils */}
+      {[
+        { top: "-9%", left: "50%", text: "N" },
+        { top: "50%", left: "109%", text: "E" },
+        { top: "109%", left: "50%", text: "S" },
+        { top: "50%", left: "-9%", text: "W" },
+      ].map((p) => (
+        <div
+          key={p.text}
+          className="absolute text-[10px] tracking-[0.3em] text-muted-foreground/40 font-medium pointer-events-none"
+          style={{ top: p.top, left: p.left, transform: "translate(-50%, -50%)" }}
+        >
+          {p.text}
+        </div>
+      ))}
+
       <canvas
         ref={canvasRef}
         onPointerDown={(e) => {
-          pointerInteracting.current = e.clientX - pointerInteractionMovement.current;
+          // *100 pour convertir la mouvement (radians) en échelle pixel — continuité entre drags
+          pointerInteracting.current = e.clientX - pointerInteractionMovement.current * 100;
           if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
         }}
         onPointerUp={() => {
@@ -447,6 +519,153 @@ function BlockchainGlobe() {
  * pour casser la transition abrupte bleu→noir entre les sections.
  * Fixed position + z-0 (au-dessus du fond noir, sous les particules).
  */
+/**
+ * PresenceMondialeSection — section dédiée qui orchestre le globe interactif
+ * et la liste des juridictions. Survol d'une juridiction → globe fly-to.
+ */
+function PresenceMondialeSection() {
+  const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
+
+  return (
+    <section className="py-32 md:py-40 relative overflow-hidden">
+      <div className="container mx-auto px-6 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-14"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/25 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse shadow-[0_0_8px_rgba(201,164,76,0.7)]" />
+            <span className="text-xs tracking-[0.3em] uppercase text-gold font-semibold">
+              Hub Émirats Arabes Unis
+            </span>
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl font-bold mb-5 leading-tight">
+            J'opère depuis <span className="text-gradient-gold">Dubaï</span>.
+            <br className="hidden md:block" />
+            Avec <span className="text-primary">4 juridictions</span> en option.
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Mon hub principal est aux Émirats — fiscalité optimale, infrastructure crypto-friendly,
+            crédibilité bancaire. Pour des cas particuliers, je structure également au UK, aux Seychelles,
+            aux États-Unis et au Panama.
+          </p>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-12 gap-12 items-center">
+          {/* Globe — colonne large */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+            className="lg:col-span-7 relative"
+          >
+            <BlockchainGlobe focusedIdx={focusedIdx} />
+            <div className="text-center mt-4 text-[10px] tracking-[0.3em] uppercase text-muted-foreground/50 font-medium">
+              {focusedIdx === null
+                ? "Glissez pour explorer · Survolez une juridiction"
+                : `Focus · ${JURISDICTION_MARKERS[focusedIdx].name}`}
+            </div>
+          </motion.div>
+
+          {/* Liste des juridictions — colonne droite */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="lg:col-span-5"
+          >
+            <div className="text-xs tracking-[0.4em] uppercase text-muted-foreground/60 mb-5 font-semibold flex items-center gap-3">
+              <span>Juridictions opérées</span>
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-gold tabular-nums">{JURISDICTION_MARKERS.length}</span>
+            </div>
+
+            <ul className="flex flex-col gap-2">
+              {JURISDICTION_MARKERS.map((j, i) => {
+                const isActive = focusedIdx === i;
+                return (
+                  <motion.li
+                    key={j.name}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.3 + i * 0.06 }}
+                  >
+                    <button
+                      type="button"
+                      onMouseEnter={() => setFocusedIdx(i)}
+                      onMouseLeave={() => setFocusedIdx(null)}
+                      onFocus={() => setFocusedIdx(i)}
+                      onBlur={() => setFocusedIdx(null)}
+                      onClick={() => setFocusedIdx(isActive ? null : i)}
+                      className={`w-full text-left rounded-xl border px-4 py-3 transition-all duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                        j.primary
+                          ? `bg-gold/[0.04] ${
+                              isActive
+                                ? "border-gold/60 shadow-[0_0_24px_rgba(201,164,76,0.25)]"
+                                : "border-gold/20 hover:border-gold/40 hover:bg-gold/[0.07]"
+                            }`
+                          : `bg-white/[0.015] ${
+                              isActive
+                                ? "border-primary/50 bg-primary/[0.05] shadow-[0_0_20px_rgba(0,212,255,0.18)]"
+                                : "border-white/[0.06] hover:border-primary/30 hover:bg-primary/[0.03]"
+                            }`
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`flex-shrink-0 rounded-full transition-all duration-300 ${
+                            j.primary
+                              ? `w-2.5 h-2.5 bg-gold shadow-[0_0_12px_rgba(201,164,76,0.85)] ${isActive ? "scale-125" : ""}`
+                              : `w-1.5 h-1.5 bg-primary/80 ${isActive ? "scale-150 shadow-[0_0_10px_rgba(0,212,255,0.7)]" : ""}`
+                          }`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2">
+                            <span className={`text-sm font-semibold transition-colors ${
+                              j.primary ? "text-gold" : isActive ? "text-primary" : "text-white/85 group-hover:text-white"
+                            }`}>
+                              {j.name}
+                            </span>
+                            {j.primary && (
+                              <span className="text-[9px] tracking-[0.25em] uppercase text-gold/70 font-bold">
+                                Hub principal
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground/75 leading-snug mt-0.5">
+                            {j.note}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </motion.li>
+                );
+              })}
+            </ul>
+
+            <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center gap-4 text-[11px] text-muted-foreground/60">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-gold shadow-[0_0_8px_rgba(201,164,76,0.7)]" />
+                <span>Hub principal · UAE</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
+                <span>Cas particuliers</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AtmosphereDepth() {
   return (
     <div
@@ -770,9 +989,48 @@ function App() {
                 « L'architecture invisible derrière <br className="hidden md:block" />
                 <span className="text-gradient-gold not-italic font-semibold">les structures qui durent.</span> »
               </h2>
-              <p className="text-base text-muted-foreground mb-10 leading-relaxed max-w-md">
+              <p className="text-base text-muted-foreground mb-7 leading-relaxed max-w-md">
                 Je structure tous types de sociétés — crypto, tech, holdings, traditionnel — avec rigueur et discrétion. Je rémunère généreusement les apporteurs d'affaires sérieux.
               </p>
+
+              {/* USP — Frictions banque ↔ crypto. La promesse différenciante. */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="relative mb-9 max-w-md"
+              >
+                <div className="relative overflow-hidden rounded-xl border border-gold/25 bg-gradient-to-r from-gold/[0.06] via-primary/[0.04] to-gold/[0.06] backdrop-blur-sm px-5 py-4">
+                  {/* Glow doré derrière */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 -z-10 opacity-60"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 0% 50%, rgba(201,164,76,0.15) 0%, transparent 60%), radial-gradient(ellipse at 100% 50%, rgba(0,212,255,0.10) 0%, transparent 60%)",
+                    }}
+                  />
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5 flex items-center gap-1">
+                      <span className="text-gold font-bold text-sm">€</span>
+                      <ArrowRight size={11} className="text-muted-foreground/60" />
+                      <span className="text-primary font-bold text-sm">Ξ</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70 font-semibold mb-1">
+                        La promesse
+                      </div>
+                      <div className="font-display text-base md:text-lg font-semibold leading-snug">
+                        Nous supprimons les frictions{" "}
+                        <span className="text-gold">banque</span>
+                        <span className="text-muted-foreground/60"> ↔ </span>
+                        <span className="text-primary">crypto</span>.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
               <div className="flex flex-col sm:flex-row gap-5">
                 <Button 
                   size="lg" 
@@ -799,7 +1057,14 @@ function App() {
 
       {/* Qui suis-je? */}
       <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-card/20" />
+        {/* Voile gradient doux : fade in/out en haut et en bas, jamais de trait horizontal */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(20,28,40,0.18) 18%, rgba(20,28,40,0.22) 50%, rgba(20,28,40,0.18) 82%, transparent 100%)",
+          }}
+        />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -863,100 +1128,8 @@ function App() {
         </div>
       </section>
 
-      {/* Présence Mondiale — Globe blockchain interactif */}
-      <section className="py-32 md:py-40 relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-14"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs tracking-[0.3em] uppercase text-primary font-semibold">
-                Réseau International
-              </span>
-            </div>
-            <h2 className="font-display text-5xl md:text-6xl font-bold mb-5 leading-tight">
-              Une présence <span className="text-gradient-gold">mondiale</span>.
-              <br className="hidden md:block" />
-              Une exécution <span className="text-primary">locale</span>.
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              16 juridictions opérées à travers les 5 continents.
-              Chaque structure est positionnée là où elle sert vos intérêts —
-              fiscalité, réputation, accès aux marchés.
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-12 gap-12 items-center">
-            {/* Globe — colonne large */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-              className="lg:col-span-7 relative"
-            >
-              <BlockchainGlobe />
-              {/* Mention discrète d'interactivité */}
-              <div className="text-center mt-4 text-[10px] tracking-[0.3em] uppercase text-muted-foreground/40 font-medium">
-                Glissez pour explorer
-              </div>
-            </motion.div>
-
-            {/* Liste des juridictions en grille — colonne droite */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="lg:col-span-5"
-            >
-              <div className="text-xs tracking-[0.4em] uppercase text-muted-foreground/60 mb-5 font-semibold flex items-center gap-3">
-                <span>Juridictions opérées</span>
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-primary tabular-nums">{JURISDICTION_MARKERS.length}</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                {JURISDICTION_MARKERS.map((j, i) => (
-                  <motion.div
-                    key={j.name}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.3 + i * 0.03 }}
-                    className="flex items-center gap-2.5 group"
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-300 ${
-                        j.premium ? "bg-gold shadow-[0_0_8px_rgba(201,164,76,0.6)]" : "bg-primary/70"
-                      } group-hover:scale-150`}
-                    />
-                    <span className="text-sm text-white/70 group-hover:text-white transition-colors">
-                      {j.name}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="mt-7 pt-5 border-t border-white/[0.06] flex items-center gap-4 text-[11px] text-muted-foreground/60">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_6px_rgba(201,164,76,0.6)]" />
-                  <span>Hubs prioritaires</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
-                  <span>Juridictions partenaires</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* Présence Mondiale — Globe blockchain interactif (UAE-centric) */}
+      <PresenceMondialeSection />
 
       {/* Manifesto — full-bleed quote section, le moment qui ancre le tout */}
       <section className="py-32 md:py-44 relative overflow-hidden">
@@ -1326,7 +1499,14 @@ function App() {
 
       {/* Contact Section */}
       <section id="contact" className="py-40 relative">
-        <div className="absolute inset-0 bg-card/30" />
+        {/* Voile gradient doux pour ancrer la section sans trait horizontal */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(20,28,40,0.22) 16%, rgba(20,28,40,0.28) 50%, rgba(20,28,40,0.18) 84%, transparent 100%)",
+          }}
+        />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
