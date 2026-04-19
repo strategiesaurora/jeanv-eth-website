@@ -81,6 +81,150 @@ function ParticleBackground() {
   );
 }
 
+/**
+ * AnimatedNumber — counts from 0 to target value once it scrolls into view.
+ * Uses ease-out cubic for organic deceleration. Triggered once, never re-runs.
+ */
+function AnimatedNumber({ value, suffix = "", duration = 1800 }: { value: number; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [displayed, setDisplayed] = useState(0);
+  const startedRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    // Honor reduced-motion preference: jump straight to final value
+    const prefersReduced = typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !startedRef.current) {
+          startedRef.current = true;
+          observer.unobserve(node);
+          if (prefersReduced) {
+            setDisplayed(value);
+            return;
+          }
+          const start = performance.now();
+          const tick = (now: number) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setDisplayed(Math.round(value * eased));
+            if (progress < 1) {
+              rafIdRef.current = requestAnimationFrame(tick);
+            } else {
+              rafIdRef.current = null;
+            }
+          };
+          rafIdRef.current = requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [value, duration]);
+
+  return (
+    <span ref={ref}>
+      {displayed}
+      {suffix}
+    </span>
+  );
+}
+
+/**
+ * CryptoPunkPortrait — hero portrait with mouse-tracked 3D parallax tilt
+ * and ornamental gold corner brackets (Swiss watch frame aesthetic).
+ */
+function CryptoPunkPortrait() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x, y });
+  };
+  const reset = () => setTilt({ x: 0, y: 0 });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.9, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+      className="flex justify-center lg:justify-end"
+    >
+      <div
+        ref={wrapRef}
+        onMouseMove={handleMove}
+        onMouseLeave={reset}
+        className="relative w-72 h-72 md:w-80 md:h-80 group cursor-pointer"
+        style={{ perspective: "1200px" }}
+      >
+        {/* Tilting inner wrapper */}
+        <div
+          className="relative w-full h-full transition-transform duration-300 ease-out"
+          style={{
+            transform: `rotateY(${tilt.x * 10}deg) rotateX(${-tilt.y * 10}deg) translateZ(0)`,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          {/* Pulsating ambient cyan halo */}
+          <div className="absolute -inset-10 rounded-full bg-primary/22 animate-crypto-pulse pointer-events-none" />
+          {/* Pulsating gold halo (offset phase) */}
+          <div
+            className="absolute -inset-6 rounded-full pointer-events-none animate-crypto-pulse"
+            style={{
+              background: "radial-gradient(circle, rgba(201,164,76,0.14) 0%, transparent 70%)",
+              animationDelay: "-2.5s",
+            }}
+          />
+          {/* Sharp inner glow */}
+          <div className="absolute -inset-1 rounded-lg bg-primary/10 blur-[20px] opacity-70 group-hover:opacity-100 group-hover:blur-[30px] transition-all duration-500" />
+          {/* Animated cyan border */}
+          <div className="absolute inset-0 rounded-lg border-2 border-primary/55 group-hover:border-primary group-hover:shadow-[0_0_70px_rgba(0,212,255,0.6),inset_0_0_30px_rgba(0,212,255,0.1)] transition-all duration-500" />
+
+          {/* CryptoPunk image */}
+          <img
+            src={cryptoPunk}
+            alt="Jean V. Rak – jeanv.eth CryptoPunk"
+            className="w-full h-full object-cover rounded-lg relative z-10 group-hover:brightness-110 transition-all duration-500"
+            style={{ imageRendering: "pixelated" }}
+          />
+
+          {/* Ornamental gold corner brackets — Swiss watch frame */}
+          <div className="absolute -top-3 -left-3 w-7 h-7 z-20 pointer-events-none"
+            style={{ borderTop: "2px solid #c9a44c", borderLeft: "2px solid #c9a44c" }} />
+          <div className="absolute -top-3 -right-3 w-7 h-7 z-20 pointer-events-none"
+            style={{ borderTop: "2px solid #c9a44c", borderRight: "2px solid #c9a44c" }} />
+          <div className="absolute -bottom-3 -left-3 w-7 h-7 z-20 pointer-events-none"
+            style={{ borderBottom: "2px solid #c9a44c", borderLeft: "2px solid #c9a44c" }} />
+          <div className="absolute -bottom-3 -right-3 w-7 h-7 z-20 pointer-events-none"
+            style={{ borderBottom: "2px solid #c9a44c", borderRight: "2px solid #c9a44c" }} />
+        </div>
+
+        {/* Floating ENS label outside parallax */}
+        <div className="absolute -bottom-10 left-0 right-0 text-center text-xs tracking-[0.3em] text-primary/70 uppercase font-medium group-hover:text-primary transition-colors">
+          jeanv.eth
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -218,11 +362,31 @@ function App() {
               transition={{ duration: 0.8 }}
               className="max-w-2xl"
             >
-              <div className="inline-block px-3 py-1 mb-8 rounded-full glass-panel border-primary/30 text-primary text-sm font-medium tracking-widest uppercase">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="inline-block px-3 py-1 mb-8 rounded-full glass-panel border-primary/30 text-primary text-sm font-medium tracking-widest uppercase"
+              >
                 Corporate Service Provider
-              </div>
-              <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-3 leading-[0.92]">
-                <span className="text-gradient">Jean V. Rak</span>
+              </motion.div>
+              {/* Letter-by-letter reveal — drama d'entrée */}
+              <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-3 leading-[0.92] text-gradient">
+                {"Jean V. Rak".split("").map((char, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: 0.4 + i * 0.05,
+                      duration: 0.7,
+                      ease: [0.23, 1, 0.32, 1],
+                    }}
+                    className="inline-block"
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </motion.span>
+                ))}
               </h1>
               <p className="text-muted-foreground/70 text-sm tracking-[0.3em] uppercase mb-8 font-sans">
                 jeanv.eth &nbsp;·&nbsp; Manager
@@ -253,35 +417,7 @@ function App() {
               </div>
             </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              whileHover={{ scale: 1.04 }}
-              className="flex justify-center lg:justify-end cursor-pointer"
-            >
-              <div className="relative w-72 h-72 md:w-80 md:h-80 group">
-                {/* Slow pulsating ambient halo — noble digital seal */}
-                <div className="absolute -inset-8 rounded-full bg-primary/20 animate-crypto-pulse pointer-events-none" />
-                {/* Gold secondary glow — prestige layer */}
-                <div className="absolute -inset-4 rounded-full pointer-events-none animate-crypto-pulse" style={{ background: "radial-gradient(circle, rgba(201,164,76,0.12) 0%, transparent 70%)", animationDelay: "-2.5s" }} />
-                {/* Sharp inner glow ring */}
-                <div className="absolute -inset-1 rounded-lg bg-primary/10 blur-[20px] opacity-60 group-hover:opacity-100 group-hover:blur-[30px] transition-all duration-500" />
-                {/* Animated border */}
-                <div className="absolute inset-0 rounded-lg border-2 border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_60px_rgba(0,212,255,0.55),inset_0_0_30px_rgba(0,212,255,0.08)] transition-all duration-500" />
-                {/* CryptoPunk image */}
-                <img 
-                  src={cryptoPunk} 
-                  alt="Jean V. Rak – jeanv.eth CryptoPunk" 
-                  className="w-full h-full object-cover rounded-lg relative z-10 group-hover:brightness-110 transition-all duration-500"
-                  style={{ imageRendering: "pixelated" }}
-                />
-                {/* Bottom label */}
-                <div className="absolute -bottom-8 left-0 right-0 text-center text-xs tracking-[0.2em] text-primary/60 uppercase font-medium group-hover:text-primary transition-colors">
-                  jeanv.eth
-                </div>
-              </div>
-            </motion.div>
+            <CryptoPunkPortrait />
           </div>
         </div>
       </section>
@@ -316,17 +452,26 @@ function App() {
               Manager expérimenté au sein d'un Corporate Service Provider de premier plan, j'accompagne la création et la structuration de <span className="text-foreground font-medium">tous types de sociétés</span> : crypto & Web3, technologies, entreprises traditionnelles, holdings et fondations. Mon expertise couvre la mise en place de véhicules légaux robustes, la conformité réglementaire et l'optimisation des structures internationales. Propriétaire du domaine <span className="text-foreground font-medium">jeanv.eth</span>, je comprends intimement les enjeux de l'écosystème crypto comme ceux du business traditionnel.
             </p>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mb-10 max-w-lg mx-auto">
+            {/* Stats row — animated count-up */}
+            <div className="grid grid-cols-3 gap-4 mb-12 max-w-lg mx-auto">
               {[
-                { num: "150+", label: "structures constituées" },
-                { num: "12+", label: "juridictions couvertes" },
-                { num: "5 ans", label: "d'expertise" },
+                { value: 150, suffix: "+", label: "structures constituées" },
+                { value: 12, suffix: "+", label: "juridictions couvertes" },
+                { value: 5, suffix: " ans", label: "d'expertise" },
               ].map((s, i) => (
-                <div key={i} className="glass-panel rounded-xl p-4 text-center border-white/8 hover:border-primary/20 transition-colors">
-                  <div className="stat-number text-gradient-gold">{s.num}</div>
-                  <div className="text-xs text-muted-foreground mt-1 leading-tight">{s.label}</div>
-                </div>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12, duration: 0.5 }}
+                  className="glass-panel rounded-xl p-5 text-center border-white/8 hover:border-primary/20 transition-colors"
+                >
+                  <div className="stat-number text-gradient-gold">
+                    <AnimatedNumber value={s.value} suffix={s.suffix} />
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2 leading-tight">{s.label}</div>
+                </motion.div>
               ))}
             </div>
 
@@ -339,7 +484,80 @@ function App() {
               Suivez-moi sur X (@jeanv_rak) <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </a>
           </motion.div>
+
+          {/* Jurisdictions Marquee — portée géographique discrète */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-24 max-w-6xl mx-auto"
+          >
+            <div className="text-center text-xs tracking-[0.4em] uppercase text-muted-foreground/50 mb-6 font-medium">
+              Juridictions opérées
+            </div>
+            <div className="overflow-hidden marquee-mask py-2 border-y border-white/5">
+              <div className="flex gap-16 animate-marquee whitespace-nowrap will-change-transform">
+                {[...Array(2)].flatMap((_, dup) =>
+                  [
+                    "Suisse", "Dubaï · UAE", "Singapour", "Luxembourg",
+                    "Cayman Islands", "BVI", "Hong Kong", "Estonie",
+                    "Delaware · USA", "Malte", "Liechtenstein", "Panama",
+                    "Île Maurice", "Seychelles", "Wyoming", "Marshall Islands",
+                  ].map((j, i) => (
+                    <div
+                      key={`${dup}-${i}`}
+                      className="font-display text-2xl md:text-3xl font-medium tracking-wide text-white/40 hover:text-white/80 transition-colors flex items-center gap-16"
+                    >
+                      <span>{j}</span>
+                      <span className="text-gold/30 text-lg">◆</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
         </div>
+      </section>
+
+      {/* Manifesto — full-bleed quote section, le moment qui ancre le tout */}
+      <section className="py-32 md:py-44 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(201,164,76,0.06) 0%, transparent 60%)" }} />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+          className="container mx-auto px-6 max-w-5xl text-center relative z-10"
+        >
+          {/* Ornamental top divider */}
+          <div className="flex items-center justify-center gap-4 mb-12">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent to-gold/40" />
+            <Quote className="text-gold/60" size={28} />
+            <div className="h-px w-16 bg-gradient-to-l from-transparent to-gold/40" />
+          </div>
+
+          <p className="font-display italic text-3xl md:text-5xl lg:text-6xl leading-[1.15] text-white/95 mb-12">
+            Une structure légale n'est pas un coût.
+            <br />
+            <span className="not-italic font-semibold text-gradient-gold">
+              C'est l'infrastructure
+            </span>{" "}
+            <span className="text-white/80">de votre liberté entrepreneuriale.</span>
+          </p>
+
+          <div className="flex items-center justify-center gap-4">
+            <div className="h-px w-12 bg-white/15" />
+            <div className="text-xs tracking-[0.4em] uppercase text-muted-foreground font-medium">
+              Jean V. Rak — jeanv.eth
+            </div>
+            <div className="h-px w-12 bg-white/15" />
+          </div>
+        </motion.div>
       </section>
 
       {/* Nos Services */}
@@ -525,29 +743,53 @@ function App() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="glass-panel p-8 rounded-2xl"
+              transition={{ duration: 0.7 }}
+              className="glass-panel p-10 rounded-2xl relative overflow-hidden"
             >
-              <h3 className="text-2xl font-semibold mb-8 text-white">Processus en 3 étapes</h3>
-              
-              <div className="space-y-8 relative">
-                {/* Timeline line */}
-                <div className="absolute left-[19px] top-2 bottom-2 w-[2px] bg-primary/20" />
-                
+              {/* Subtle ambient gold gradient */}
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(201,164,76,0.06) 0%, transparent 70%)" }} />
+
+              <div className="flex items-baseline justify-between mb-10 relative z-10">
+                <h3 className="font-display text-3xl font-bold text-white">Le processus</h3>
+                <span className="text-xs uppercase tracking-[0.3em] text-gold/60">en 3 actes</span>
+              </div>
+
+              <div className="space-y-10 relative z-10">
                 {[
-                  { step: "1", title: "Identifiez un projet", desc: "Vous présentez un prospect qui a besoin de structuration corporate." },
-                  { step: "2", title: "Mettez en relation", desc: "Une seule introduction suffit, nous gérons tout le reste." },
-                  { step: "3", title: "Percevez vos commissions", desc: "Paiement rapide dès signature du mandat, jusqu'à 20%." }
+                  { step: 1, title: "Identifiez un projet", desc: "Vous présentez un prospect qui a besoin de structuration corporate. Crypto, tech, traditionnel — tous secteurs accueillis." },
+                  { step: 2, title: "Mettez en relation", desc: "Une seule introduction suffit. Je prends le relais et orchestre l'intégralité de la structuration." },
+                  { step: 3, title: "Percevez vos commissions", desc: "Paiement rapide dès signature du mandat, jusqu'à 20% des frais. Sans délai, sans question." }
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-6 relative">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary font-bold shadow-[0_0_15px_rgba(0,212,255,0.3)] z-10">
-                      {item.step}
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 + i * 0.15, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                    className="flex gap-6 items-start group"
+                  >
+                    {/* Giant gold step number */}
+                    <div className="step-number flex-shrink-0 w-20 text-right opacity-90 group-hover:opacity-100 transition-opacity duration-400">
+                      {String(item.step).padStart(2, "0")}
                     </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-2">{item.title}</h4>
+                    {/* Vertical divider line */}
+                    <div className="flex-shrink-0 w-px self-stretch bg-gradient-to-b from-gold/40 via-gold/15 to-transparent group-hover:from-gold/70 transition-colors duration-400" />
+                    {/* Content */}
+                    <div className="flex-grow pt-2">
+                      <h4 className="font-display text-xl font-semibold text-white mb-2 group-hover:text-gold/95 transition-colors duration-400">{item.title}</h4>
                       <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
+              </div>
+
+              {/* Footer note */}
+              <div className="mt-10 pt-6 border-t border-white/[0.06] flex items-center gap-3 relative z-10">
+                <CheckCircle2 size={16} className="text-gold/70" />
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Sans engagement · Confidentialité totale · Paiements rapides
+                </span>
               </div>
             </motion.div>
           </div>
