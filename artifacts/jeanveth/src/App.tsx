@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
+import createGlobe from "cobe";
 import { 
   Menu, X, Building2, MapPin, Coins, Shield, 
   Calculator, CheckCircle2, ChevronRight, Lock, 
   Globe2, UserCheck, CheckSquare, ArrowRight, Quote,
-  BadgeCheck
+  BadgeCheck, Copy, Check
 } from "lucide-react";
 import cryptoPunk from "@assets/regular_1776549681584.png";
 import { Button } from "@/components/ui/button";
@@ -301,6 +302,301 @@ function NostrIcon({ size = 22, className = "" }: { size?: number; className?: s
   );
 }
 
+/**
+ * BlockchainGlobe — globe 3D interactif (cobe) avec marqueurs cyan
+ * pour chaque juridiction opérée. Auto-rotation + drag pointeur.
+ * La même librairie que Linear, Vercel, Stripe utilisent pour leurs globes.
+ */
+const JURISDICTION_MARKERS: Array<{ name: string; location: [number, number]; size: number; premium?: boolean }> = [
+  { name: "Suisse",            location: [46.20, 6.14],     size: 0.09, premium: true },
+  { name: "Dubaï · UAE",       location: [25.20, 55.27],    size: 0.11, premium: true },
+  { name: "Singapour",         location: [1.35, 103.82],    size: 0.10, premium: true },
+  { name: "Luxembourg",        location: [49.61, 6.13],     size: 0.07 },
+  { name: "Cayman Islands",    location: [19.31, -81.25],   size: 0.08 },
+  { name: "BVI",               location: [18.42, -64.62],   size: 0.07 },
+  { name: "Hong Kong",         location: [22.30, 114.17],   size: 0.09 },
+  { name: "Estonie",           location: [59.44, 24.75],    size: 0.07 },
+  { name: "Delaware · USA",    location: [39.16, -75.52],   size: 0.08 },
+  { name: "Malte",             location: [35.90, 14.51],    size: 0.06 },
+  { name: "Liechtenstein",     location: [47.14, 9.52],     size: 0.06 },
+  { name: "Panama",            location: [8.97, -79.53],    size: 0.07 },
+  { name: "Île Maurice",       location: [-20.35, 57.55],   size: 0.07 },
+  { name: "Seychelles",        location: [-4.62, 55.45],    size: 0.06 },
+  { name: "Wyoming · USA",     location: [42.96, -107.30],  size: 0.07 },
+  { name: "Marshall Islands",  location: [7.13, 171.18],    size: 0.06 },
+];
+
+function BlockchainGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointerInteracting = useRef<number | null>(null);
+  const pointerInteractionMovement = useRef(0);
+  const phiRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let width = canvas.offsetWidth;
+    const onResize = () => {
+      if (canvas) width = canvas.offsetWidth;
+    };
+    window.addEventListener("resize", onResize);
+
+    const prefersReduced = typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    const globe = createGlobe(canvas, {
+      devicePixelRatio: 2,
+      width: width * 2,
+      height: width * 2,
+      phi: 0,
+      theta: 0.28,
+      dark: 1,
+      diffuse: 1.4,
+      mapSamples: 18000,
+      mapBrightness: 5.5,
+      // Tons sombres bleutés pour matcher le bg du site
+      baseColor: [0.08, 0.13, 0.20],
+      // Cyan signature (#00d4ff)
+      markerColor: [0, 0.83, 1],
+      // Glow cyan profond derrière le globe
+      glowColor: [0.0, 0.32, 0.55],
+      markers: JURISDICTION_MARKERS.map(m => ({ location: m.location, size: m.size })),
+      onRender: (state: Record<string, number>) => {
+        if (pointerInteracting.current === null && !prefersReduced) {
+          phiRef.current += 0.0028;
+        }
+        state.phi = phiRef.current + pointerInteractionMovement.current;
+        state.width = width * 2;
+        state.height = width * 2;
+      },
+    } as Parameters<typeof createGlobe>[1]);
+
+    // Fade-in après que le globe a rendu son premier frame
+    const fadeTimer = setTimeout(() => {
+      if (canvas) canvas.style.opacity = "1";
+    }, 80);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      globe.destroy();
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full max-w-[560px] mx-auto" style={{ aspectRatio: "1 / 1" }}>
+      {/* Halo cyan profond derrière le globe */}
+      <div
+        className="absolute inset-0 -z-10 pointer-events-none rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 55%, rgba(0,212,255,0.18) 0%, rgba(0,212,255,0.06) 35%, transparent 65%)",
+          filter: "blur(20px)",
+        }}
+      />
+      {/* Halo doré subtil en bas (impression de socle/ancrage) */}
+      <div
+        className="absolute -inset-x-8 -bottom-4 h-32 -z-10 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center top, rgba(201,164,76,0.08) 0%, transparent 70%)",
+          filter: "blur(12px)",
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        onPointerDown={(e) => {
+          pointerInteracting.current = e.clientX - pointerInteractionMovement.current;
+          if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
+        }}
+        onPointerUp={() => {
+          pointerInteracting.current = null;
+          if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+        }}
+        onPointerOut={() => {
+          pointerInteracting.current = null;
+          if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+        }}
+        onMouseMove={(e) => {
+          if (pointerInteracting.current !== null) {
+            const delta = e.clientX - pointerInteracting.current;
+            pointerInteractionMovement.current = delta / 100;
+          }
+        }}
+        onTouchMove={(e) => {
+          if (pointerInteracting.current !== null && e.touches[0]) {
+            const delta = e.touches[0].clientX - pointerInteracting.current;
+            pointerInteractionMovement.current = delta / 100;
+          }
+        }}
+        style={{
+          width: "100%",
+          height: "100%",
+          cursor: "grab",
+          contain: "layout paint size",
+          opacity: 0,
+          transition: "opacity 1.2s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * AtmosphereDepth — couche de gradients radiaux fixés en viewport
+ * pour casser la transition abrupte bleu→noir entre les sections.
+ * Fixed position + z-0 (au-dessus du fond noir, sous les particules).
+ */
+function AtmosphereDepth() {
+  return (
+    <div
+      className="fixed inset-0 pointer-events-none z-0"
+      aria-hidden="true"
+      style={{
+        background: [
+          // Voile cyan en haut-gauche (ancrage hero)
+          "radial-gradient(ellipse 60% 40% at 15% 0%, rgba(0,212,255,0.10) 0%, transparent 60%)",
+          // Voile cyan profond à droite (équilibre)
+          "radial-gradient(ellipse 50% 50% at 100% 35%, rgba(0,140,200,0.08) 0%, transparent 55%)",
+          // Voile doré au milieu (chaleur premium)
+          "radial-gradient(ellipse 70% 30% at 50% 55%, rgba(201,164,76,0.04) 0%, transparent 65%)",
+          // Voile cyan en bas (continuité)
+          "radial-gradient(ellipse 80% 50% at 30% 100%, rgba(0,180,230,0.07) 0%, transparent 60%)",
+          // Voile doré bas-droite
+          "radial-gradient(ellipse 50% 40% at 85% 95%, rgba(201,164,76,0.05) 0%, transparent 55%)",
+        ].join(", "),
+      }}
+    />
+  );
+}
+
+/**
+ * NostrContactCard — carte premium pour identifiant Nostr.
+ * Au clic, copie l'identifiant `_@jeanv.eth` dans le presse-papier
+ * et affiche un feedback "Copié !" pendant 2 secondes.
+ * (Pas de lien externe car nécessite un client Nostr installé localement.)
+ */
+function NostrContactCard() {
+  const NOSTR_ID = "_@jeanv.eth";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(NOSTR_ID);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback silencieux : on tente prompt() pour les navigateurs sans clipboard API
+      window.prompt("Copiez l'identifiant Nostr :", NOSTR_ID);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={`Copier l'identifiant Nostr ${NOSTR_ID}`}
+      className="group relative block w-full text-left rounded-xl p-4 overflow-hidden transition-all duration-400 cursor-pointer"
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(201,164,76,0.06) 0%, rgba(0,212,255,0.04) 100%)",
+        border: "1px solid rgba(201,164,76,0.25)",
+        boxShadow: "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "rgba(201,164,76,0.5)";
+        e.currentTarget.style.boxShadow =
+          "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 30px rgba(201,164,76,0.18)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "rgba(201,164,76,0.25)";
+        e.currentTarget.style.boxShadow =
+          "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)";
+      }}
+    >
+      {/* Halo doré subtil au survol */}
+      <div
+        className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(201,164,76,0.18) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative z-10 flex items-start gap-4">
+        {/* Icône Nostr dans son médaillon */}
+        <div
+          className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-400 group-hover:scale-105"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(201,164,76,0.18) 0%, rgba(201,164,76,0.06) 100%)",
+            border: "1px solid rgba(201,164,76,0.4)",
+            color: "#c9a44c",
+          }}
+        >
+          <NostrIcon size={22} />
+        </div>
+
+        <div className="flex-grow min-w-0">
+          {/* En-tête + badge NIP-05 */}
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="font-semibold text-white text-sm">
+              Me contacter via Nostr
+            </span>
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase"
+              style={{
+                background: "rgba(0,212,255,0.1)",
+                border: "1px solid rgba(0,212,255,0.4)",
+                color: "hsl(var(--primary))",
+              }}
+            >
+              <BadgeCheck size={10} />
+              NIP-05
+            </span>
+          </div>
+
+          {/* Identifiant + bouton copier dynamique */}
+          <div className="flex items-center justify-between gap-2">
+            <code
+              className="text-xs font-mono tracking-tight truncate"
+              style={{ color: "rgba(201,164,76,0.85)" }}
+            >
+              {NOSTR_ID}
+            </code>
+            <span
+              className={`flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${
+                copied
+                  ? "bg-primary/15 text-primary border border-primary/40"
+                  : "bg-white/[0.04] text-muted-foreground/70 border border-white/10 group-hover:text-gold group-hover:border-gold/40"
+              }`}
+              style={copied ? { boxShadow: "0 0 12px rgba(0,212,255,0.4)" } : undefined}
+            >
+              {copied ? (
+                <>
+                  <Check size={10} strokeWidth={3} />
+                  Copié
+                </>
+              ) : (
+                <>
+                  <Copy size={10} />
+                  Copier
+                </>
+              )}
+            </span>
+          </div>
+
+          {/* Mention sécurité */}
+          <div className="mt-2 flex items-center gap-1.5 text-[10px] tracking-wider uppercase text-muted-foreground/60">
+            <Lock size={9} />
+            <span>Chiffré · Décentralisé · Sans serveur</span>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -347,6 +643,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden relative">
+      <AtmosphereDepth />
       <ParticleBackground />
       {/* Scroll Progress Indicator */}
       <motion.div
@@ -563,38 +860,101 @@ function App() {
             </a>
           </motion.div>
 
-          {/* Jurisdictions Marquee — portée géographique discrète */}
+        </div>
+      </section>
+
+      {/* Présence Mondiale — Globe blockchain interactif */}
+      <section className="py-32 md:py-40 relative overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-24 max-w-6xl mx-auto"
+            transition={{ duration: 0.8 }}
+            className="text-center mb-14"
           >
-            <div className="text-center text-xs tracking-[0.4em] uppercase text-muted-foreground/50 mb-6 font-medium">
-              Juridictions opérées
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs tracking-[0.3em] uppercase text-primary font-semibold">
+                Réseau International
+              </span>
             </div>
-            <div className="overflow-hidden marquee-mask py-2 border-y border-white/5">
-              <div className="flex gap-16 animate-marquee whitespace-nowrap will-change-transform">
-                {[...Array(2)].flatMap((_, dup) =>
-                  [
-                    "Suisse", "Dubaï · UAE", "Singapour", "Luxembourg",
-                    "Cayman Islands", "BVI", "Hong Kong", "Estonie",
-                    "Delaware · USA", "Malte", "Liechtenstein", "Panama",
-                    "Île Maurice", "Seychelles", "Wyoming", "Marshall Islands",
-                  ].map((j, i) => (
-                    <div
-                      key={`${dup}-${i}`}
-                      className="font-display text-2xl md:text-3xl font-medium tracking-wide text-white/40 hover:text-white/80 transition-colors flex items-center gap-16"
-                    >
-                      <span>{j}</span>
-                      <span className="text-gold/30 text-lg">◆</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <h2 className="font-display text-5xl md:text-6xl font-bold mb-5 leading-tight">
+              Une présence <span className="text-gradient-gold">mondiale</span>.
+              <br className="hidden md:block" />
+              Une exécution <span className="text-primary">locale</span>.
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              16 juridictions opérées à travers les 5 continents.
+              Chaque structure est positionnée là où elle sert vos intérêts —
+              fiscalité, réputation, accès aux marchés.
+            </p>
           </motion.div>
+
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            {/* Globe — colonne large */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+              className="lg:col-span-7 relative"
+            >
+              <BlockchainGlobe />
+              {/* Mention discrète d'interactivité */}
+              <div className="text-center mt-4 text-[10px] tracking-[0.3em] uppercase text-muted-foreground/40 font-medium">
+                Glissez pour explorer
+              </div>
+            </motion.div>
+
+            {/* Liste des juridictions en grille — colonne droite */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="lg:col-span-5"
+            >
+              <div className="text-xs tracking-[0.4em] uppercase text-muted-foreground/60 mb-5 font-semibold flex items-center gap-3">
+                <span>Juridictions opérées</span>
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-primary tabular-nums">{JURISDICTION_MARKERS.length}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                {JURISDICTION_MARKERS.map((j, i) => (
+                  <motion.div
+                    key={j.name}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.3 + i * 0.03 }}
+                    className="flex items-center gap-2.5 group"
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all duration-300 ${
+                        j.premium ? "bg-gold shadow-[0_0_8px_rgba(201,164,76,0.6)]" : "bg-primary/70"
+                      } group-hover:scale-150`}
+                    />
+                    <span className="text-sm text-white/70 group-hover:text-white transition-colors">
+                      {j.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="mt-7 pt-5 border-t border-white/[0.06] flex items-center gap-4 text-[11px] text-muted-foreground/60">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_6px_rgba(201,164,76,0.6)]" />
+                  <span>Hubs prioritaires</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/70" />
+                  <span>Juridictions partenaires</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -1038,94 +1398,8 @@ function App() {
                     <div className="flex-1 h-px bg-white/[0.06]" />
                   </div>
 
-                  {/* Carte Nostr — Canal décentralisé chiffré, ultra-sécurisé */}
-                  <a
-                    href="https://nosta.me/jeanv.eth"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative block rounded-xl p-4 overflow-hidden transition-all duration-400"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(201,164,76,0.06) 0%, rgba(0,212,255,0.04) 100%)",
-                      border: "1px solid rgba(201,164,76,0.25)",
-                      boxShadow: "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(201,164,76,0.5)";
-                      e.currentTarget.style.boxShadow =
-                        "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 30px rgba(201,164,76,0.18)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(201,164,76,0.25)";
-                      e.currentTarget.style.boxShadow =
-                        "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)";
-                    }}
-                  >
-                    {/* Halo doré subtil au survol */}
-                    <div
-                      className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                      style={{
-                        background:
-                          "radial-gradient(circle, rgba(201,164,76,0.18) 0%, transparent 70%)",
-                      }}
-                    />
-
-                    <div className="relative z-10 flex items-start gap-4">
-                      {/* Icône Nostr dans son médaillon */}
-                      <div
-                        className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-400 group-hover:scale-105"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, rgba(201,164,76,0.18) 0%, rgba(201,164,76,0.06) 100%)",
-                          border: "1px solid rgba(201,164,76,0.4)",
-                          color: "#c9a44c",
-                        }}
-                      >
-                        <NostrIcon size={22} />
-                      </div>
-
-                      <div className="flex-grow min-w-0">
-                        {/* En-tête + badge NIP-05 */}
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="font-semibold text-white text-sm">
-                            Me contacter via Nostr
-                          </span>
-                          <span
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase"
-                            style={{
-                              background: "rgba(0,212,255,0.1)",
-                              border: "1px solid rgba(0,212,255,0.4)",
-                              color: "hsl(var(--primary))",
-                            }}
-                          >
-                            <BadgeCheck size={10} />
-                            NIP-05 Vérifié
-                          </span>
-                        </div>
-
-                        {/* Sous-texte avec identifiant Nostr */}
-                        <div className="flex items-center justify-between gap-2">
-                          <code
-                            className="text-xs font-mono tracking-tight"
-                            style={{ color: "rgba(201,164,76,0.85)" }}
-                          >
-                            _@jeanv.eth
-                          </code>
-                          <ArrowRight
-                            size={13}
-                            className="flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300"
-                            style={{ color: "#c9a44c" }}
-                          />
-                        </div>
-
-                        {/* Mention sécurité */}
-                        <div className="mt-2 flex items-center gap-1.5 text-[10px] tracking-wider uppercase text-muted-foreground/60">
-                          <Lock size={9} />
-                          <span>Chiffré · Décentralisé · Sans serveur</span>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
+                  {/* Carte Nostr — Canal décentralisé chiffré, copie l'identifiant */}
+                  <NostrContactCard />
 
                   <p className="text-xs text-muted-foreground/40 text-center mt-2">
                     Consultation confidentielle &amp; sans engagement
