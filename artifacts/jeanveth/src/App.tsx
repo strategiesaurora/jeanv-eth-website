@@ -3,7 +3,8 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { 
   Menu, X, Building2, MapPin, Coins, Shield, 
   Calculator, CheckCircle2, ChevronRight, Lock, 
-  Globe2, UserCheck, CheckSquare, ArrowRight, Quote
+  Globe2, UserCheck, CheckSquare, ArrowRight, Quote,
+  BadgeCheck
 } from "lucide-react";
 import cryptoPunk from "@assets/regular_1776549681584.png";
 import { Button } from "@/components/ui/button";
@@ -225,6 +226,81 @@ function CryptoPunkPortrait() {
   );
 }
 
+/**
+ * VerifiedHandle — affiche un identifiant Web3 (ex: "jeanv.eth") avec un badge
+ * de vérification cyan luminescent. Visuellement traité comme une identité
+ * blockchain officielle (à la Twitter Verified, mais en cyan premium).
+ */
+function VerifiedHandle({
+  text = "jeanv.eth",
+  size = "md",
+  underline = true,
+  className = "",
+}: {
+  text?: string;
+  size?: "sm" | "md" | "lg";
+  underline?: boolean;
+  className?: string;
+}) {
+  const iconSize = size === "sm" ? 12 : size === "lg" ? 18 : 14;
+  return (
+    <span className={`inline-flex items-center gap-1.5 align-baseline ${className}`}>
+      <span
+        className={underline ? "relative" : ""}
+        style={
+          underline
+            ? {
+                backgroundImage:
+                  "linear-gradient(transparent calc(100% - 2px), hsl(var(--primary) / 0.55) calc(100% - 2px))",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "100% 100%",
+              }
+            : undefined
+        }
+      >
+        {text}
+      </span>
+      <BadgeCheck
+        size={iconSize}
+        className="text-primary flex-shrink-0 drop-shadow-[0_0_6px_rgba(0,212,255,0.7)]"
+        aria-label="Identité Web3 vérifiée"
+      />
+    </span>
+  );
+}
+
+/**
+ * NostrIcon — logo officiel stylisé Nostr (lettre N avec arc).
+ * Conserve la silhouette reconnaissable du protocole décentralisé.
+ */
+function NostrIcon({ size = 22, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Cercle extérieur */}
+      <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeWidth="1.4" opacity="0.85" />
+      {/* Lettre N stylisée + arc Nostr */}
+      <path
+        d="M8.2 16.5V8.2c0-.4.4-.7.8-.5l5.6 4c.5.4.5 1.2 0 1.6l-3.2 2.3c-.4.3-.4.9 0 1.2l1.4 1c.4.3.9.3 1.3 0l1.7-1.4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      {/* Point identité */}
+      <circle cx="16.5" cy="9" r="0.9" fill="currentColor" />
+    </svg>
+  );
+}
+
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -388,8 +464,10 @@ function App() {
                   </motion.span>
                 ))}
               </h1>
-              <p className="text-muted-foreground/70 text-sm tracking-[0.3em] uppercase mb-8 font-sans">
-                jeanv.eth &nbsp;·&nbsp; Manager
+              <p className="text-muted-foreground/70 text-sm tracking-[0.3em] uppercase mb-8 font-sans flex items-center gap-3 flex-wrap">
+                <VerifiedHandle text="jeanv.eth" size="sm" underline={false} className="text-primary/90" />
+                <span className="text-muted-foreground/40">·</span>
+                <span>Manager</span>
               </p>
               <h2 className="font-display text-2xl md:text-3xl font-light text-foreground/90 mb-4 leading-snug italic">
                 « L'architecture invisible derrière <br className="hidden md:block" />
@@ -922,12 +1000,12 @@ function App() {
                     Remplissez le formulaire ou prenez directement rendez-vous via Calendly pour une première consultation confidentielle.
                   </p>
                   
-                  <div className="space-y-6 text-sm text-muted-foreground">
+                  <div className="space-y-5 text-sm text-muted-foreground">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <Globe2 size={18} />
                       </div>
-                      <span className="font-medium text-foreground">jeanv.eth</span>
+                      <VerifiedHandle text="jeanv.eth" size="md" underline={false} className="font-medium text-foreground" />
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -940,8 +1018,8 @@ function App() {
                   </div>
                 </div>
 
-                <div className="mt-12 relative z-10 space-y-3">
-                  {/* Shimmer Calendly CTA — sweeping light effect */}
+                <div className="mt-10 relative z-10 space-y-4">
+                  {/* Shimmer Calendly CTA — canal premium principal */}
                   <a 
                     href="https://calendly.com/jeanv-rak" 
                     target="_blank"
@@ -952,7 +1030,106 @@ function App() {
                     Réserver un appel de 30 min
                     <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </a>
-                  <p className="text-xs text-muted-foreground/40 text-center mt-2">Consultation confidentielle &amp; sans engagement</p>
+
+                  {/* Délimiteur "OU" subtil */}
+                  <div className="flex items-center gap-3 py-1">
+                    <div className="flex-1 h-px bg-white/[0.06]" />
+                    <span className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground/40 font-medium">ou</span>
+                    <div className="flex-1 h-px bg-white/[0.06]" />
+                  </div>
+
+                  {/* Carte Nostr — Canal décentralisé chiffré, ultra-sécurisé */}
+                  <a
+                    href="https://nosta.me/jeanv.eth"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block rounded-xl p-4 overflow-hidden transition-all duration-400"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(201,164,76,0.06) 0%, rgba(0,212,255,0.04) 100%)",
+                      border: "1px solid rgba(201,164,76,0.25)",
+                      boxShadow: "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(201,164,76,0.5)";
+                      e.currentTarget.style.boxShadow =
+                        "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 30px rgba(201,164,76,0.18)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(201,164,76,0.25)";
+                      e.currentTarget.style.boxShadow =
+                        "0 0 0 1px rgba(0,0,0,0.4) inset, 0 4px 20px rgba(0,0,0,0.25)";
+                    }}
+                  >
+                    {/* Halo doré subtil au survol */}
+                    <div
+                      className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                      style={{
+                        background:
+                          "radial-gradient(circle, rgba(201,164,76,0.18) 0%, transparent 70%)",
+                      }}
+                    />
+
+                    <div className="relative z-10 flex items-start gap-4">
+                      {/* Icône Nostr dans son médaillon */}
+                      <div
+                        className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-400 group-hover:scale-105"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, rgba(201,164,76,0.18) 0%, rgba(201,164,76,0.06) 100%)",
+                          border: "1px solid rgba(201,164,76,0.4)",
+                          color: "#c9a44c",
+                        }}
+                      >
+                        <NostrIcon size={22} />
+                      </div>
+
+                      <div className="flex-grow min-w-0">
+                        {/* En-tête + badge NIP-05 */}
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-semibold text-white text-sm">
+                            Me contacter via Nostr
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase"
+                            style={{
+                              background: "rgba(0,212,255,0.1)",
+                              border: "1px solid rgba(0,212,255,0.4)",
+                              color: "hsl(var(--primary))",
+                            }}
+                          >
+                            <BadgeCheck size={10} />
+                            NIP-05 Vérifié
+                          </span>
+                        </div>
+
+                        {/* Sous-texte avec identifiant Nostr */}
+                        <div className="flex items-center justify-between gap-2">
+                          <code
+                            className="text-xs font-mono tracking-tight"
+                            style={{ color: "rgba(201,164,76,0.85)" }}
+                          >
+                            _@jeanv.eth
+                          </code>
+                          <ArrowRight
+                            size={13}
+                            className="flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300"
+                            style={{ color: "#c9a44c" }}
+                          />
+                        </div>
+
+                        {/* Mention sécurité */}
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] tracking-wider uppercase text-muted-foreground/60">
+                          <Lock size={9} />
+                          <span>Chiffré · Décentralisé · Sans serveur</span>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+
+                  <p className="text-xs text-muted-foreground/40 text-center mt-2">
+                    Consultation confidentielle &amp; sans engagement
+                  </p>
                 </div>
               </div>
 
@@ -1021,7 +1198,7 @@ function App() {
             © {new Date().getFullYear()} jeanv.eth. Tous droits réservés.
           </div>
           <div className="flex items-center gap-8">
-            <span className="text-sm font-bold text-white tracking-wider">jeanv.eth</span>
+            <VerifiedHandle text="jeanv.eth" size="md" underline={true} className="text-sm font-bold text-white tracking-wider" />
             <a href="https://x.com/jeanv_rak" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
